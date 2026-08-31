@@ -3,6 +3,8 @@
 /private/
 
 /.php-cs-fixer.cache
+/.phpunit.cache/
+.phpactor.json
 
 # Local environment / secrets
 .env
@@ -12,5 +14,6 @@
 # OS / editor files
 .DS_Store
 Thumbs.db
+
 /config/database.php
 /config/database.test.php
