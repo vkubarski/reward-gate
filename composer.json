@@ -1,16 +1,22 @@
 {
-    "name": "vladimir/reward-gate",
+    "name": "rewardgate/reward-gate",
     "type": "project",
     "autoload": {
         "psr-4": {
-            "Vladimir\\RewardGate\\": "src/"
+            "RewardGate\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "RewardGate\\Tests\\": "tests/"
         }
     },
     "require": {
         "php": ">=8.2",
         "ext-pdo": "*",
         "ext-pdo_mysql": "*",
-        "robmorgan/phinx": "^0.16"
+        "robmorgan/phinx": "^0.16",
+        "symfony/yaml": "^7.4"
     },
     "require-dev": {
         "phpunit/phpunit": "^11.5",
@@ -21,6 +27,10 @@
         "platform": {
             "php": "8.2.0"
         }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test:unit": "phpunit tests/Unit",
+        "test:integration": "phpunit tests/Integration"
     }
 }
-

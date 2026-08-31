@@ -1,34 +1,16 @@
 <?php
 
-$host = 'localhost';
-$database = 'reward_gate';
-$username = 'reward_gate';
-$password = '0d4769CRVjOpYBckeUfWLuvuR6jq7nS6AhvZKcl3abI=';
+declare(strict_types=1);
 
-try {
-    $pdo = new PDO(
-        "mysql:host={$host};dbname={$database};charset=utf8mb4",
-        $username,
-        $password,
-        [
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            ]
-    );
+use RewardGate\Http\Router;
 
-    $stmt = $pdo->query('SELECT DATABASE() AS database_name, VERSION() AS version');
-    $result = $stmt->fetch();
+require_once __DIR__ . '/../bootstrap.php';
+$registerRoutes = require __DIR__ . '/../config/routes.php';
 
-    echo '<pre>';
-    echo 'Database: ' . htmlspecialchars($result['database_name']) . PHP_EOL;
-    echo 'Version: ' . htmlspecialchars($result['version']) . PHP_EOL;
-    echo 'Connection: OK' . PHP_EOL;
-    echo '</pre>';
-} catch (PDOException $e) {
-    http_response_code(500);
+$router = new Router();
+$registerRoutes($router);
 
-    echo '<pre>';
-    echo 'Database connection failed.' . PHP_EOL;
-    echo htmlspecialchars($e->getMessage()) . PHP_EOL;
-    echo '</pre>';
-}
+$router->dispatch(
+    $_SERVER['REQUEST_METHOD'],
+    parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)
+);

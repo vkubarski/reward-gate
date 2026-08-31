@@ -1,0 +1,16 @@
+paths:
+    migrations: database/migrations
+    seeds: database/seeds
+
+environments:
+    default_migration_table: phinxlog
+    default_environment: development
+
+    development:
+        adapter: mysql
+        host: localhost
+        name: reward_gate
+        user: reward_gate
+        pass: 0d4769CRVjOpYBckeUfWLuvuR6jq7nS6AhvZKcl3abI=
+        port: 3306
+        charset: utf8mb4
