@@ -576,6 +576,17 @@ final class UnlockSessionServiceTest extends TestCase
             CampaignRepositoryInterface::class
         );
 
+        $campaignRepository
+            ->expects($this->once())
+            ->method('findByIdForUpdate')
+            ->with(1)
+            ->willReturn([
+                'id' => 1,
+                'status' => 'active',
+                'unlock_method' => 'timer',
+                'frequency_limit_seconds' => null,
+                ]);
+
         $unlockSessionRepository = $this->createMock(
             UnlockSessionRepositoryInterface::class
         );
@@ -634,6 +645,89 @@ final class UnlockSessionServiceTest extends TestCase
         );
 
         $service->complete('test-token', 'visitor-123');
+    }
+
+    public function testCompleteAllowsClickUnlockWithoutElapsedDuration(): void
+    {
+        $campaignRepository = $this->createMock(
+            CampaignRepositoryInterface::class
+        );
+
+        $campaignRepository
+            ->expects($this->once())
+            ->method('findByIdForUpdate')
+            ->with(1)
+            ->willReturn([
+                'id' => 1,
+                'status' => 'active',
+                'unlock_method' => 'click',
+                'frequency_limit_seconds' => null,
+            ]);
+
+        $unlockSessionRepository = $this->createMock(
+            UnlockSessionRepositoryInterface::class
+        );
+
+        $unlockSessionRepository
+            ->expects($this->once())
+            ->method('findByTokenHash')
+            ->willReturn([
+                'id' => 1,
+                'campaign_id' => 1,
+                'visitor_id' => 'visitor-123',
+                'status' => 'active',
+                'required_duration_seconds' => 3600,
+                'started_at' => date(
+                    'Y-m-d H:i:s',
+                    time() - 60
+                ),
+                'expires_at' => date(
+                    'Y-m-d H:i:s',
+                    time() + 300
+                ),
+            ]);
+
+        $unlockSessionRepository
+            ->expects($this->once())
+            ->method('markCompleted')
+            ->with(1)
+            ->willReturn(true);
+
+        $unlockCompletionRepository = $this->createMock(
+            UnlockCompletionRepositoryInterface::class
+        );
+
+        $unlockCompletionRepository
+            ->expects($this->once())
+            ->method('create')
+            ->with(
+                1,
+                1,
+                'visitor-123',
+                $this->isType('string')
+            );
+
+        $pdo = $this->createMock(PDO::class);
+
+        $pdo
+            ->expects($this->once())
+            ->method('beginTransaction');
+
+        $pdo
+            ->expects($this->once())
+            ->method('commit');
+
+        $service = new UnlockSessionService(
+            $pdo,
+            $campaignRepository,
+            $unlockSessionRepository,
+            $unlockCompletionRepository,
+        );
+
+        $service->complete(
+            'test-token',
+            'visitor-123'
+        );
     }
 
     public function testCompleteRejectsMissingCampaign(): void

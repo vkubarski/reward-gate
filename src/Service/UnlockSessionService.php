@@ -181,18 +181,6 @@ final class UnlockSessionService implements UnlockSessionServiceInterface
             );
         }
 
-        $elapsedSeconds = $now->getTimestamp()
-                - $startedAt->getTimestamp();
-
-        if (
-            $elapsedSeconds
-            < (int) $session['required_duration_seconds']
-        ) {
-            throw new InvalidArgumentException(
-                'Required unlock duration has not elapsed.'
-            );
-        }
-
         $this->pdo->beginTransaction();
 
         try {
@@ -210,6 +198,20 @@ final class UnlockSessionService implements UnlockSessionServiceInterface
                 throw new InvalidArgumentException(
                     'Campaign is not active.'
                 );
+            }
+
+            if ($campaign['unlock_method'] === 'timer') {
+                $elapsedSeconds = $now->getTimestamp()
+                        - $startedAt->getTimestamp();
+
+                if (
+                    $elapsedSeconds
+                    < (int) $session['required_duration_seconds']
+                ) {
+                    throw new InvalidArgumentException(
+                        'Required unlock duration has not elapsed.'
+                    );
+                }
             }
 
             $frequencyLimitSeconds =
