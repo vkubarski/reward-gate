@@ -255,9 +255,13 @@ final class UnlockControllerTest extends TestCase
         $unlockSessionService
             ->expects($this->once())
             ->method('complete')
-            ->with('session-token');
+            ->with('session-token', 'visitor-123');
 
         $visitorId = $this->createStub(VisitorIdInterface::class);
+
+        $visitorId
+            ->method('get')
+            ->willReturn('visitor-123');
 
         $controller = $this->createController(
             $unlockSessionService,
@@ -345,7 +349,7 @@ final class UnlockControllerTest extends TestCase
         $unlockSessionService
             ->expects($this->once())
             ->method('complete')
-            ->with('invalid-token')
+            ->with('invalid-token', 'visitor-123')
             ->willThrowException(
                 new InvalidArgumentException(
                     'Invalid unlock session.'
@@ -353,6 +357,10 @@ final class UnlockControllerTest extends TestCase
             );
 
         $visitorId = $this->createStub(VisitorIdInterface::class);
+
+        $visitorId
+            ->method('get')
+            ->willReturn('visitor-123');
 
         $controller = $this->createController(
             $unlockSessionService,
@@ -381,12 +389,16 @@ final class UnlockControllerTest extends TestCase
         $unlockSessionService
             ->expects($this->once())
             ->method('complete')
-            ->with('session-token')
+            ->with('session-token', 'visitor-123')
             ->willThrowException(
                 new RuntimeException('Database failure.')
             );
 
         $visitorId = $this->createStub(VisitorIdInterface::class);
+
+        $visitorId
+            ->method('get')
+            ->willReturn('visitor-123');
 
         $controller = $this->createController(
             $unlockSessionService,
@@ -415,7 +427,7 @@ final class UnlockControllerTest extends TestCase
         $unlockSessionService
             ->expects($this->once())
             ->method('complete')
-            ->with('')
+            ->with('', 'visitor-123')
             ->willThrowException(
                 new InvalidArgumentException(
                     'Unlock token is required.'
@@ -423,6 +435,10 @@ final class UnlockControllerTest extends TestCase
             );
 
         $visitorId = $this->createStub(VisitorIdInterface::class);
+
+        $visitorId
+            ->method('get')
+            ->willReturn('visitor-123');
 
         $controller = $this->createController(
             $unlockSessionService,
