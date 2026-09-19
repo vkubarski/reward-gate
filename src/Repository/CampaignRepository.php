@@ -47,6 +47,26 @@ final class CampaignRepository implements CampaignRepositoryInterface
             : $this->hydrate($campaign);
     }
 
+    public function findByIdForUpdate(int $id): ?array
+    {
+        $statement = $this->pdo->prepare(
+            'SELECT *
+                FROM campaigns
+                WHERE id = :id
+                FOR UPDATE'
+        );
+
+        $statement->execute([
+            'id' => $id,
+        ]);
+
+        $campaign = $statement->fetch();
+
+        return $campaign === false
+            ? null
+            : $this->hydrate($campaign);
+    }
+
     public function create(
         string $name,
         string $presentationType,

@@ -356,25 +356,29 @@ The Popup Gate must:
 
 #### 4.1.2 Content / Read-more Gate
 
-The Content / Read-more Gate leaves part of the content visible while
-protecting the remainder.
+The Content / Read-more Gate leaves part of the customer's existing content visible while hiding the remainder until the unlock flow is successfully completed.
 
-Typical workflow:
+For the MVP:
 
-1. The visitor reads the visible portion of the content.
-2. The remaining content is hidden or otherwise protected.
-3. A clear "Continue Reading" or "Unlock the Rest" control is displayed.
-4. The visitor starts the unlock flow.
-5. The timer begins.
-6. The visitor completes the required duration.
-7. The server verifies completion.
-8. The protected content becomes visible.
+* The customer website owns and serves the article/content.
+* Reward Gate does not store or manage the article HTML.
+* The customer places a Reward Gate split-point element where the visible portion ends.
+* The split-point is an empty `<div>` containing the campaign ID.
+* Content following the split-point within the same parent is hidden while the gate is locked.
+* Reward Gate controls the gate UI, unlock flow, and reveal state.
+* The protected content remains in the customer's page DOM while locked.
+* CSS is part of the gate and hides the protected content before JavaScript initializes.
+* If JavaScript is disabled, the protected content remains hidden and cannot be revealed through the Reward Gate UI.
+* After successful server-side verification, the gate changes to its unlocked state and the original content becomes visible.
+* The protected DOM is not removed, copied, reconstructed, or rewritten during the unlock process.
 
-The amount of content visible before the gate should eventually be
-configurable.
+The MVP supports one Content Gate per page.
 
-The MVP may use a simple configuration value or sensible default rather
-than requiring a full visual campaign builder.
+The Content Gate intentionally provides controlled visibility rather than strong content security. Because the protected HTML is already present in the browser, technically sophisticated visitors may be able to bypass the gate.
+
+The MVP does not use percentage, word-count, character-count, or automatic content splitting.
+
+The Content Gate uses the same unlock session, timer, server verification, completion, replay protection, and frequency-limit logic as the Popup Gate.
 
 #### 4.1.3 Shared Presentation Principle
 
@@ -544,22 +548,24 @@ The fundamental flow is:
 
 #### 4.4.2 Content / Read-more Gate Flow
 
-1. The visitor loads a page containing a Content / Read-more Gate.
-2. The configured visible portion of the content is displayed.
-3. The protected portion remains inaccessible.
-4. The visitor selects the unlock control.
+1. The customer's page contains the article and a Reward Gate split-point.
+2. Reward Gate CSS hides the content following the split-point while the gate is locked.
+3. Reward Gate JavaScript initializes the gate inside the split-point.
+4. The visitor selects the Continue Reading / Unlock control.
 5. The server creates an unlock session.
-6. The server records the session start time and required completion time.
-7. The client displays the countdown.
-8. The visitor waits until the required duration has elapsed.
-9. The client requests completion.
-10. The server validates the unlock session.
-11. The server verifies that the minimum completion time has elapsed.
-12. The server verifies that the session has not already been completed or
-    invalidated.
-13. The server records the successful completion.
-14. The reward is granted.
-15. The protected portion of the content becomes accessible.
+6. The client displays the countdown inside the Content Gate.
+7. The visitor waits until the required duration has elapsed.
+8. The client requests completion.
+9. The server validates the unlock session.
+10. The server verifies that the required minimum completion time has elapsed.
+11. The server verifies that the session has not already been completed or invalidated.
+12. The server records the successful completion.
+13. The client changes the split-point to its unlocked state.
+14. The previously hidden content becomes visible without changing the underlying DOM.
+
+If completion verification fails, the content remains hidden and the reward is not granted.
+
+No additional protected-content endpoint is required for the MVP.
 
 #### 4.4.3 Shared Workflow
 
@@ -673,29 +679,46 @@ Completion requests must be protected against replay.
 A previously completed, expired, or otherwise invalid session must not be
 accepted as a new valid completion.
 
-#### 4.5.5 Protected Content
+#### 4.5.5 Content Gate Security Scope
 
-Where the reward provides access to protected content, the implementation
-must ensure that the protection mechanism cannot be trivially bypassed by
-simply changing a client-side flag.
+The Content Gate is a client-side visibility mechanism.
 
-For content that is intended to remain inaccessible before successful
-completion, the protected state should be enforced in a way appropriate to
-the content type.
+The complete customer-provided content may already be present in the browser before the unlock is completed. Reward Gate therefore does not treat the Content Gate as a strong content-security boundary.
 
-The exact protection mechanism will be determined during implementation.
+The Content Gate's server-side security boundary applies to the unlock process itself:
 
-#### 4.5.6 Security Scope
+* unlock sessions are created by the server;
+* timer completion is verified by the server;
+* completion tokens are validated by the server;
+* replay protection is enforced by the server;
+* frequency limits are enforced by the server.
 
-The MVP is intended to prevent straightforward client-side bypasses and
-replay attacks.
+Successful server-side verification allows the client to reveal the already-present content.
 
-It is not intended to provide complete protection against sophisticated
-fraud, automation, distributed abuse, browser instrumentation, or
-determined attackers.
+The MVP does not attempt to prevent a technically sophisticated visitor from inspecting or extracting hidden HTML.
 
-Additional anti-fraud and abuse controls may be introduced as the product
-develops.
+Future server-side content protection may be introduced separately if a real product requirement justifies it.
+
+### 4.6 Campaign Integration
+
+Each campaign should provide installation/integration instructions or generated code appropriate to its presentation type.
+
+For Popup Gate, the campaign administration interface should provide copyable embed code containing the campaign ID and required frontend assets.
+
+For Content Gate, the campaign administration interface should provide copyable integration code containing:
+
+* the campaign ID;
+* the Content Gate split-point element;
+* the required Reward Gate CSS;
+* the required Reward Gate JavaScript.
+
+The Content Gate integration operates on content already present on the customer's website.
+
+Reward Gate does not store, render, split, or manage the customer's article content.
+
+The MVP does not require WordPress, CMS, server-side customer integration, or modification of the customer's backend.
+
+Platform-specific integrations remain future scope.
 
 ## 5. First Commercial Release
 
@@ -732,7 +755,7 @@ Potential campaign configuration should include:
 - unlock method
 - reward type
 - timer duration
-- protected content behavior
+- Content Gate presentation and visibility behavior
 - visitor frequency limits
 - basic anti-abuse settings
 - appearance settings
@@ -1267,6 +1290,13 @@ Presentation-specific code should primarily control:
 
 This separation is an important architectural test during the MVP.
 
+The Popup Gate and Content Gate may use different presentation-specific
+frontend implementations. Sharing the unlock workflow does not require
+sharing the presentation UI.
+
+The Content Gate should reuse the existing unlock-session and completion
+protocol rather than duplicating timer and verification business logic.
+
 ### 7.3 Application Structure
 
 The initial standalone application should use a straightforward PHP structure.
@@ -1658,6 +1688,8 @@ The exact implementation should be determined during the security and technical 
 
 Visitor identification should be minimized and should consider applicable privacy requirements.
 
+For Content Gate, /status returns unlocked when the visitor has a successful completion for the campaign that is still within the campaign's frequency window. If the campaign has no frequency limit (NULL), any successful completion permanently unlocks the Content Gate for that visitor.
+
 ### 8.9 IDs and Relationships
 
 Database entities should use stable identifiers and explicit relationships.
@@ -2038,15 +2070,25 @@ Session identifiers should be regenerated after authentication and other securit
 
 The application should avoid exposing session identifiers through URLs.
 
-### 9.13 Content Protection
+### 9.13 Content Gate and Client-Side Visibility
 
-If Reward Gate claims to protect content, the protected content must not remain trivially accessible through an alternative public endpoint.
+The MVP Content Gate is intentionally a client-side visibility mechanism rather than a strong content-security mechanism.
 
-For content that is intended to be protected, the application should determine whether the visitor has a valid unlock before serving the protected resource.
+The complete content may already be present in the visitor's browser while the gate is locked.
 
-Client-side hiding alone is not a sufficient security boundary.
+The Content Gate therefore must not be described as:
 
-For example, placing the complete protected content in the HTML and merely hiding it with CSS does not provide meaningful access control.
+* secure storage;
+* strong access control;
+* encryption;
+* DRM;
+* protection against technically sophisticated users.
+
+The server-side unlock system remains authoritative for determining whether the visitor has successfully completed the required unlock action.
+
+After successful verification, the client reveals the already-present content.
+
+Future features that require genuine server-side content protection must use a separate architecture in which protected content is withheld from the initial response.
 
 ### 9.14 Download Protection
 

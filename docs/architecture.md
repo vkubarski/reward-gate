@@ -343,6 +343,34 @@ Content / Read-more Gate
        └── Reward
 ```
 
+The Content / Read-more Gate is a client-side presentation of the shared
+unlock flow.
+
+The customer website owns and serves the content.
+
+Reward Gate owns:
+
+* the campaign configuration
+* the Content Gate split-point contract
+* the gate UI
+* the frontend gate state
+* the shared unlock/session flow
+* server-side verification
+* completion and anti-abuse logic
+
+Reward Gate does not store, render, split, or fetch the customer's article
+content for the MVP.
+
+The Content Gate controls visibility of content that is already present in
+the customer's page.
+
+The protected content remains in the page DOM while locked. CSS hides the
+content while the gate is locked, and successful server-side verification
+allows the client to reveal the existing content.
+
+The Content Gate therefore provides controlled visibility rather than a
+strong content-security boundary.
+
 The Popup Gate and Content / Read-more Gate should not contain separate implementations of:
 
 - session creation
@@ -364,16 +392,22 @@ The initial architecture is based around several independent concepts.
 
 ### 7.1 Campaign
 
-Defines what a site owner wants to achieve.
+Defines how a site owner configures a Reward Gate experience.
 
-A campaign may eventually contain:
+A campaign may contain:
 
-- presentation configuration
-- unlock method
-- reward configuration
-- visitor limits
-- appearance settings
-- targeting rules
+* presentation type and presentation-specific settings
+* unlock method and its configuration
+* reward type and its configuration
+* visitor and frequency limits
+* appearance settings
+* other configuration required by the supported presentation
+
+For Content Gate campaigns, presentation-specific settings describe the gate
+behavior and configuration. They do not contain the customer's article HTML.
+
+Campaign configuration should remain separate from the content hosted on the
+customer's website.
 
 ### 7.2 Presentation
 
@@ -479,6 +513,151 @@ The client is responsible for presenting the interaction.
 
 The server is authoritative regarding completion.
 
+### 8.1 Content Gate Flow
+
+The Content / Read-more Gate operates on content already present on the
+customer's website.
+
+The customer places an empty Reward Gate split-point inside the content:
+
+```html
+<div
+    data-reward-gate
+    data-campaign-id="123"
+></div>
+```
+
+The split-point marks the boundary between visible and gated content.
+
+The Content Gate frontend uses the following flow:
+
+```text
+Customer Page
+     │
+     ├── Public Content
+     │
+     ├── Reward Gate Split-Point
+     │
+     └── Content Following Split-Point
+              │
+              ▼
+        CSS hides content
+              │
+              ▼
+        Reward Gate UI
+              │
+              ▼
+        Shared Unlock Flow
+              │
+              ▼
+        Server Verification
+              │
+         ┌────┴────┐
+         │         │
+       Invalid    Valid
+         │         │
+         ▼         ▼
+       Reject    Unlock
+                     │
+                     ▼
+            Reveal existing content
+```
+
+The Content Gate uses the same unlock/session/completion logic as the Popup
+Gate.
+
+The presentation-specific frontend is responsible for:
+
+* locating the split-point
+* rendering the gate UI
+* displaying the countdown
+* reporting completion
+* changing the gate to its unlocked state
+
+The frontend must not remove, copy, or reconstruct the protected content.
+
+Successful verification changes the gate state and allows the existing DOM
+to become visible.
+
+No separate protected-content endpoint is required for the MVP.
+
+The Content Gate supports one gate per page in the MVP.
+
+If JavaScript is disabled, the CSS gate remains active and the gated content
+remains hidden.
+
+The Content Gate is intentionally a client-side visibility mechanism. The
+protected HTML may already exist in the visitor's browser, so the feature
+must not be treated as strong content protection.
+
+### 8.2 Campaign Integration
+
+Each campaign provides installation information or generated integration
+code appropriate to its presentation type.
+
+For Popup Gate, the integration contains the campaign ID and the required
+frontend assets.
+
+For Content Gate, the integration contains:
+
+* the campaign ID
+* the Content Gate split-point element
+* the required Reward Gate CSS
+* the required Reward Gate JavaScript
+
+The Content Gate integration operates entirely on the customer's existing
+page content.
+
+Reward Gate does not require access to the customer's content storage,
+CMS, database, or server-side rendering pipeline for the MVP.
+
+The customer remains responsible for the article/content itself.
+
+Platform-specific CMS integrations such as WordPress remain outside the MVP.
+
+### 8.3 Content Gate Frontend Contract
+
+The Content Gate uses a split-point rather than a content marker or copied
+content.
+
+The default contract is:
+
+```html
+<any-parent>
+    ...public content...
+
+    <div
+        data-reward-gate
+        data-campaign-id="123"
+    ></div>
+
+    ...gated content...
+</any-parent>
+```
+
+The gate applies to content following the split-point within the same parent.
+
+The MVP does not require:
+
+* content markers such as `[[REWARD_GATE]]`
+* customer-specific CSS selectors
+* paragraph-count splitting
+* percentage-based splitting
+* copied article content
+* explicit protected-content wrappers
+* CMS-specific integration
+
+The Content Gate CSS is part of the functional gate.
+
+The CSS must be available before the gated content is rendered so that
+disabled or unavailable JavaScript does not cause the protected content to
+flash visibly.
+
+Unlocking should change the gate state rather than modifying the protected
+DOM.
+
+The initial implementation should use one Content Gate per page.
+
 ---
 
 ## 9. Server Authority
@@ -522,6 +701,12 @@ Core concepts include:
 - rewards
 - unlock sessions
 - unlock completions
+
+Content owned by the customer's website is not a database entity in the
+Reward Gate MVP.
+
+Reward Gate stores campaign and presentation configuration, not copies of
+customer article content.
 
 The physical schema should be normalized where useful without turning the MVP into a generic enterprise metadata system.
 

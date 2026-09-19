@@ -19,7 +19,7 @@ use RewardGate\Service\CampaignService;
 use RewardGate\Service\UnlockSessionService;
 use RewardGate\Security\VisitorId;
 
-return static function (Router $router) use ($pdo): void {
+return static function (Router $router) use ($pdo, $appConfig): void {
     $campaignRepository = new CampaignRepository($pdo);
     $campaignService = new CampaignService($campaignRepository);
 
@@ -57,7 +57,8 @@ return static function (Router $router) use ($pdo): void {
     $adminAuthController = new AdminAuthController(
         $adminAuthService,
         $adminSession,
-        $csrfToken
+        $csrfToken,
+        $appConfig['version']
     );
 
     $adminAuthGuard = new AdminAuthGuard($adminSession);
@@ -90,6 +91,20 @@ return static function (Router $router) use ($pdo): void {
         )
     );
 
+    $router->get(
+        '/admin/campaigns/{id}/edit',
+        $adminAuthGuard->protect(
+            [$campaignController, 'edit']
+        )
+    );
+
+    $router->post(
+        '/admin/campaigns/{id}',
+        $adminAuthGuard->protect(
+            [$campaignController, 'update']
+        )
+    );
+
     $router->post(
         '/unlock/{id}/start',
         [$unlockController, 'start']
@@ -118,5 +133,48 @@ return static function (Router $router) use ($pdo): void {
     $router->post(
         '/admin/logout',
         [$adminAuthController, 'logout']
+    );
+
+    $router->post(
+        '/admin/campaigns/{id}/activate',
+        $adminAuthGuard->protect(
+            [$campaignController, 'activate']
+        )
+    );
+
+    $router->post(
+        '/admin/campaigns/{id}/pause',
+        $adminAuthGuard->protect(
+            [$campaignController, 'pause']
+        )
+    );
+
+    $router->post(
+        '/admin/campaigns/{id}/archive',
+        $adminAuthGuard->protect(
+            [$campaignController, 'archive']
+        )
+    );
+
+    $router->get(
+        '/demo',
+        static function(): void {
+            require __DIR__ . '/../views/demo.php';
+        }
+    );
+
+    $router->post(
+        '/unlock/{id}/start',
+        [$unlockController, 'start']
+    );
+
+    $router->get(
+        '/unlock/{id}/status',
+        [$unlockController, 'status']
+    );
+
+    $router->post(
+        '/unlock/complete',
+        [$unlockController, 'complete']
     );
 };

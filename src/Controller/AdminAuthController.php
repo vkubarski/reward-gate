@@ -5,15 +5,16 @@ declare(strict_types=1);
 namespace RewardGate\Controller;
 
 use RewardGate\Auth\AdminSessionInterface;
-use RewardGate\Service\AdminAuthServiceInterface;
 use RewardGate\Security\CsrfTokenInterface;
+use RewardGate\Service\AdminAuthServiceInterface;
 
 final class AdminAuthController
 {
     public function __construct(
         private AdminAuthServiceInterface $adminAuthService,
         private AdminSessionInterface $adminSession,
-        private CsrfTokenInterface $csrfToken
+        private CsrfTokenInterface $csrfToken,
+        private string $appVersion
     ) {
     }
 
@@ -24,7 +25,7 @@ final class AdminAuthController
             exit;
         }
 
-        require __DIR__ . '/../../views/auth/login.php';
+        $this->renderLogin();
     }
 
     public function login(): void
@@ -34,11 +35,16 @@ final class AdminAuthController
             exit;
         }
 
-        $username = trim((string)($_POST['username'] ?? ''));
+        $username = trim(
+            (string)($_POST['username'] ?? '')
+        );
+
         $password = (string)($_POST['password'] ?? '');
 
         if ($username === '' || $password === '') {
-            $this->renderLogin('Username and password are required.');
+            $this->renderLogin(
+                'Username and password are required.'
+            );
 
             return;
         }
@@ -49,12 +55,16 @@ final class AdminAuthController
         );
 
         if ($adminUser === null) {
-            $this->renderLogin('Invalid username or password.');
+            $this->renderLogin(
+                'Invalid username or password.'
+            );
 
             return;
         }
 
-        $this->adminSession->login((int)$adminUser['id']);
+        $this->adminSession->login(
+            (int)$adminUser['id']
+        );
 
         header('Location: /admin/campaigns');
         exit;
@@ -79,8 +89,17 @@ final class AdminAuthController
         exit;
     }
 
-    private function renderLogin(?string $error = null): void
-    {
+    private function renderLogin(
+        ?string $error = null
+    ): void {
+        $version = $this->appVersion;
+        ob_start();
+
         require __DIR__ . '/../../views/auth/login.php';
+
+        $content = ob_get_clean();
+        $title = 'Admin Login - Reward Gate';
+
+        require __DIR__ . '/../../views/layout-auth.php';
     }
 }

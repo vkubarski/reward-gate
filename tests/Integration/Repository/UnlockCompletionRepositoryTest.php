@@ -249,4 +249,54 @@ final class UnlockCompletionRepositoryTest extends IntegrationTestCase
 
         $this->assertSame(0, $count);
     }
+
+    public function testHasCompletionByCampaignAndVisitorReturnsTrueForMatchingCompletion(): void
+    {
+        $repository = new UnlockCompletionRepository($this->pdo);
+
+        $campaignId = $this->createCampaign();
+
+        $sessionId = $this->createUnlockSession(
+            $campaignId
+        );
+
+        $repository->create(
+            $sessionId,
+            $campaignId,
+            'visitor-123',
+            '2026-08-20 12:00:00'
+        );
+
+        $this->assertTrue(
+            $repository->hasCompletionByCampaignAndVisitor(
+                $campaignId,
+                'visitor-123'
+            )
+        );
+    }
+
+    public function testHasCompletionByCampaignAndVisitorReturnsFalseWhenNoMatchingCompletionExists(): void
+    {
+        $repository = new UnlockCompletionRepository($this->pdo);
+
+        $campaignId = $this->createCampaign();
+
+        $sessionId = $this->createUnlockSession(
+            $campaignId
+        );
+
+        $repository->create(
+            $sessionId,
+            $campaignId,
+            'visitor-123',
+            '2026-08-20 12:00:00'
+        );
+
+        $this->assertFalse(
+            $repository->hasCompletionByCampaignAndVisitor(
+                $campaignId,
+                'different-visitor'
+            )
+        );
+    }
 }

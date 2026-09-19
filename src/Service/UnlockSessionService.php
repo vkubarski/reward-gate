@@ -38,15 +38,19 @@ final class UnlockSessionService implements UnlockSessionServiceInterface
             throw new InvalidArgumentException('Campaign is not active.');
         }
 
-        if ($campaign['unlock_method'] !== 'timer') {
+        $unlockMethod = $campaign['unlock_method'];
+
+        if (!in_array($unlockMethod, ['timer', 'click'], true)) {
             throw new InvalidArgumentException(
                 'Unsupported unlock method.'
             );
         }
 
-        $requiredDuration = (int) $campaign['timer_duration_seconds'];
+        $requiredDuration = $unlockMethod === 'timer'
+            ? (int) $campaign['timer_duration_seconds']
+            : 0;
 
-        if ($requiredDuration < 1) {
+        if ($unlockMethod === 'timer' && $requiredDuration < 1) {
             throw new InvalidArgumentException(
                 'Campaign timer duration must be greater than zero.'
             );
@@ -66,6 +70,7 @@ final class UnlockSessionService implements UnlockSessionServiceInterface
         $tokenHash = hash('sha256', $token);
 
         $startedAt = new DateTimeImmutable();
+
         $expiresAt = $startedAt->modify(
             '+' . ($requiredDuration + 300) . ' seconds'
         );
@@ -87,7 +92,47 @@ final class UnlockSessionService implements UnlockSessionServiceInterface
         ];
     }
 
-    public function complete(string $token): void
+    public function status(
+        int $campaignId,
+        ?string $visitorId = null,
+    ): bool {
+        $campaign = $this->campaignRepository->findById($campaignId);
+
+        if ($campaign === null) {
+            throw new InvalidArgumentException('Campaign not found.');
+        }
+
+        if ($visitorId === null) {
+            return false;
+        }
+
+        $frequencyLimitSeconds =
+            $campaign['frequency_limit_seconds'];
+
+        if ($frequencyLimitSeconds === null) {
+            return $this->unlockCompletionRepository
+                ->hasCompletionByCampaignAndVisitor(
+                    $campaignId,
+                    $visitorId,
+                );
+        }
+
+        $cutoff = (new DateTimeImmutable())
+            ->modify("-{$frequencyLimitSeconds} seconds")
+            ->format('Y-m-d H:i:s');
+
+        return $this->unlockCompletionRepository
+            ->countRecentByCampaignAndVisitor(
+                $campaignId,
+                $visitorId,
+                $cutoff,
+            ) > 0;
+    }
+
+    public function complete(
+        string $token,
+        ?string $visitorId = null,
+    ): void
     {
         if ($token === '') {
             throw new InvalidArgumentException(
@@ -104,6 +149,15 @@ final class UnlockSessionService implements UnlockSessionServiceInterface
         if ($session === null) {
             throw new InvalidArgumentException(
                 'Invalid unlock session.'
+            );
+        }
+
+        if (
+            $session['visitor_id'] !== null
+            && $session['visitor_id'] !== $visitorId
+        ) {
+            throw new InvalidArgumentException(
+                'Unlock session does not belong to this visitor.'
             );
         }
 
@@ -139,21 +193,28 @@ final class UnlockSessionService implements UnlockSessionServiceInterface
             );
         }
 
-        $campaign = $this->campaignRepository->findById(
-            (int) $session['campaign_id']
-        );
-
-        if ($campaign === null) {
-            throw new RuntimeException(
-                'Campaign associated with unlock session was not found.'
-            );
-        }
-
-        $frequencyLimitSeconds = $campaign['frequency_limit_seconds'];
-
         $this->pdo->beginTransaction();
 
         try {
+            $campaign = $this->campaignRepository->findByIdForUpdate(
+                (int) $session['campaign_id']
+            );
+
+            if ($campaign === null) {
+                throw new RuntimeException(
+                    'Campaign associated with unlock session was not found.'
+                );
+            }
+
+            if ($campaign['status'] !== 'active') {
+                throw new InvalidArgumentException(
+                    'Campaign is not active.'
+                );
+            }
+
+            $frequencyLimitSeconds =
+                    $campaign['frequency_limit_seconds'];
+
             $completed = $this->unlockSessionRepository->markCompleted(
                 (int) $session['id']
             );

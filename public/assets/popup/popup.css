@@ -39,8 +39,89 @@
     margin-bottom: 20px;
 }
 
+.reward-gate__content {
+    margin-bottom: 20px;
+
+    overflow-wrap: anywhere;
+}
+
+.reward-gate__content img {
+    max-width: 100%;
+    height: auto;
+}
+
+.reward-gate__content iframe {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    border: 0;
+}
+
 .reward-gate__error {
     margin-top: 15px;
 
     color: #b91c1c;
+}
+
+.reward-gate__completion-title {
+    margin-bottom: 10px;
+
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.reward-gate__completion-message {
+    font-size: 1rem;
+}
+
+.reward-gate__expired-title {
+    margin-bottom: 10px;
+
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.reward-gate__expired-message {
+    margin-bottom: 20px;
+}
+
+.reward-gate__retry {
+    padding: 10px 20px;
+
+    border: 0;
+    border-radius: 6px;
+
+    background: #2563eb;
+    color: #ffffff;
+
+    font: inherit;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.reward-gate__retry:hover {
+    background: #1d4ed8;
+}
+
+@media (max-width: 480px) {
+    .reward-gate {
+        padding: 12px;
+    }
+
+    .reward-gate__dialog {
+        padding: 22px;
+        border-radius: 10px;
+    }
+
+    .reward-gate__timer {
+        margin: 16px 0;
+
+        font-size: 1.75rem;
+    }
+}
+
+.reward-gate__retry:focus-visible {
+    outline: 3px solid #93c5fd;
+    outline-offset: 3px;
 }

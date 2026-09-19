@@ -117,7 +117,9 @@ final class CampaignServiceTest extends TestCase
 
         $presentationSettings = [
             'title' => 'Wait to unlock',
-            'show_close_button' => false,
+            'message' => 'Almost there.',
+            'show_message' => false,
+            'content' => '<div>Ad content</div>',
         ];
 
         $campaignRepository
@@ -165,12 +167,18 @@ final class CampaignServiceTest extends TestCase
             ->with(
                 'Test Campaign',
                 'popup',
-                null,
+                [
+                    'title' => 'Unlock Content',
+                    'message' =>
+                        'Please wait while your content is being unlocked.',
+                    'show_message' => true,
+                    'content' => '',
+                ],
                 'draft',
                 'timer',
                 10,
                 'content',
-                null
+                null,
             )
             ->willReturn(1);
 
@@ -204,14 +212,19 @@ final class CampaignServiceTest extends TestCase
             ->with(
                 'Test Campaign',
                 'popup',
-                null,
+                [
+                    'title' => 'Unlock Content',
+                    'message' =>
+                        'Please wait while your content is being unlocked.',
+                    'show_message' => true,
+                    'content' => '',
+                ],
                 'draft',
                 'timer',
                 10,
                 'content',
                 3600
-            )
-            ->willReturn(1);
+            )->willReturn(1);
 
         $service = new CampaignService(
             $campaignRepository
@@ -231,6 +244,128 @@ final class CampaignServiceTest extends TestCase
         $this->assertSame(1, $result);
     }
 
+    public function testCreateNormalizesMissingPopupSettings(): void
+    {
+        $campaignRepository = $this->createMock(
+            CampaignRepositoryInterface::class
+        );
+
+        $campaignRepository
+            ->expects($this->once())
+            ->method('create')
+            ->with(
+                'Test Campaign',
+                'popup',
+                [
+                    'title' => 'Unlock Content',
+                    'message' =>
+                        'Please wait while your content is being unlocked.',
+                    'show_message' => true,
+                    'content' => '',
+                ],
+                'draft',
+                'timer',
+                10,
+                'content',
+                null
+            )
+            ->willReturn(1);
+
+        $service = new CampaignService(
+            $campaignRepository
+        );
+
+        $result = $service->create(
+            'Test Campaign',
+            'popup'
+        );
+
+        $this->assertSame(1, $result);
+    }
+
+    public function testCreatePreservesProvidedPopupSettingsAndAddsDefaults(): void
+    {
+        $campaignRepository = $this->createMock(
+            CampaignRepositoryInterface::class
+        );
+
+        $campaignRepository
+            ->expects($this->once())
+            ->method('create')
+            ->with(
+                'Test Campaign',
+                'popup',
+                [
+                    'title' => 'My Title',
+                    'message' =>
+                        'Please wait while your content is being unlocked.',
+                    'show_message' => true,
+                    'content' => '',
+                ],
+                'draft',
+                'timer',
+                10,
+                'content',
+                null
+            )
+            ->willReturn(1);
+
+        $service = new CampaignService(
+            $campaignRepository
+        );
+
+        $result = $service->create(
+            'Test Campaign',
+            'popup',
+            [
+                'title' => 'My Title',
+            ]
+        );
+
+        $this->assertSame(1, $result);
+    }
+
+    public function testCreatePreservesExplicitEmptyPopupValues(): void
+    {
+        $campaignRepository = $this->createMock(
+            CampaignRepositoryInterface::class
+        );
+
+        $settings = [
+            'title' => '',
+            'message' => '',
+            'show_message' => false,
+            'content' => '',
+        ];
+
+        $campaignRepository
+            ->expects($this->once())
+            ->method('create')
+            ->with(
+                'Test Campaign',
+                'popup',
+                $settings,
+                'draft',
+                'timer',
+                10,
+                'content',
+                null
+            )
+            ->willReturn(1);
+
+        $service = new CampaignService(
+            $campaignRepository
+        );
+
+        $result = $service->create(
+            'Test Campaign',
+            'popup',
+            $settings
+        );
+
+        $this->assertSame(1, $result);
+    }
+
     public function testFindByIdReturnsRepositoryResult(): void
     {
         $campaignRepository = $this->createMock(
@@ -241,6 +376,14 @@ final class CampaignServiceTest extends TestCase
             'id' => 42,
             'name' => 'Test Campaign',
             'status' => 'active',
+            'presentation_type' => 'popup',
+            'unlock_method' => 'timer',
+            'presentation_settings' => [
+                'title' => 'Test Title',
+                'message' => 'Test message.',
+                'show_message' => false,
+                'content' => '<div>Test content</div>',
+            ],
         ];
 
         $campaignRepository
@@ -256,6 +399,95 @@ final class CampaignServiceTest extends TestCase
         $result = $service->findById(42);
 
         $this->assertSame($campaign, $result);
+    }
+
+    public function testFindByIdNormalizesIncompletePopupSettings(): void
+    {
+        $campaignRepository = $this->createMock(
+            CampaignRepositoryInterface::class
+        );
+
+        $campaignRepository
+            ->expects($this->once())
+            ->method('findById')
+            ->with(42)
+            ->willReturn([
+                'id' => 42,
+                'name' => 'Old Campaign',
+                'status' => 'active',
+                'presentation_type' => 'popup',
+                'unlock_method' => 'timer',
+                'presentation_settings' => [
+                    'title' => 'Old Title',
+                ],
+            ]);
+
+        $service = new CampaignService(
+            $campaignRepository
+        );
+
+        $result = $service->findById(42);
+
+        $this->assertSame(
+            [
+                'id' => 42,
+                'name' => 'Old Campaign',
+                'status' => 'active',
+                'presentation_type' => 'popup',
+                'unlock_method' => 'timer',
+                'presentation_settings' => [
+                    'title' => 'Old Title',
+                    'message' =>
+                        'Please wait while your content is being unlocked.',
+                    'show_message' => true,
+                    'content' => '',
+                ],
+            ],
+            $result
+        );
+    }
+
+    public function testUpdateNormalizesPopupSettings(): void
+    {
+        $campaignRepository = $this->createMock(
+            CampaignRepositoryInterface::class
+        );
+
+        $campaignRepository
+            ->expects($this->once())
+            ->method('update')
+            ->with(
+                42,
+                [
+                    'presentation_type' => 'popup',
+                    'unlock_method' => 'timer',
+                    'presentation_settings' => [
+                        'title' => 'New Title',
+                        'message' =>
+                            'Please wait while your content is being unlocked.',
+                        'show_message' => true,
+                        'content' => '',
+                    ],
+                ]
+            )
+            ->willReturn(true);
+
+        $service = new CampaignService(
+            $campaignRepository
+        );
+
+        $result = $service->update(
+            42,
+            [
+                'presentation_type' => 'popup',
+                'unlock_method' => 'timer',
+                'presentation_settings' => [
+                    'title' => 'New Title',
+                ],
+            ]
+        );
+
+        $this->assertTrue($result);
     }
 
     public function testFindByIdReturnsNullWhenRepositoryReturnsNull(): void
@@ -474,7 +706,7 @@ final class CampaignServiceTest extends TestCase
                 [
                     'name' => 'Updated Campaign',
                     'presentation_type' => 'content',
-                    'unlock_method' => 'timer',
+                    'unlock_method' => 'click',
                     'reward_type' => 'content',
                     'frequency_limit_seconds' => 3600,
                 ]
@@ -490,7 +722,7 @@ final class CampaignServiceTest extends TestCase
             [
                 'name' => 'Updated Campaign',
                 'presentation_type' => 'content',
-                'unlock_method' => 'timer',
+                'unlock_method' => 'click',
                 'reward_type' => 'content',
                 'frequency_limit_seconds' => 3600,
             ]
@@ -528,5 +760,140 @@ final class CampaignServiceTest extends TestCase
         );
 
         $this->assertFalse($result);
+    }
+
+    public function testUpdatePreservesExplicitEmptyPopupValues(): void
+    {
+        $campaignRepository = $this->createMock(
+            CampaignRepositoryInterface::class
+        );
+
+        $settings = [
+            'title' => '',
+            'message' => '',
+            'show_message' => false,
+            'content' => '',
+        ];
+
+        $campaignRepository
+            ->expects($this->once())
+            ->method('update')
+            ->with(
+                42,
+                [
+                    'presentation_type' => 'popup',
+                    'unlock_method' => 'timer',
+                    'presentation_settings' => $settings,
+                ]
+            )
+            ->willReturn(true);
+
+        $service = new CampaignService(
+            $campaignRepository
+        );
+
+        $result = $service->update(
+            42,
+            [
+                'presentation_type' => 'popup',
+                'unlock_method' => 'timer',
+                'presentation_settings' => $settings,
+            ]
+        );
+
+        $this->assertTrue($result);
+    }
+
+    public function testCreateRejectsPopupWithClickUnlock(): void
+    {
+        $campaignRepository = $this->createMock(
+            CampaignRepositoryInterface::class
+        );
+
+        $service = new CampaignService(
+            $campaignRepository
+        );
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage(
+            'Invalid presentation type and unlock method combination.'
+        );
+
+        $service->create(
+            'Test Campaign',
+            'popup',
+            null,
+            'draft',
+            'click'
+        );
+    }
+
+    public function testCreateRejectsContentWithTimerUnlock(): void
+    {
+        $campaignRepository = $this->createMock(
+            CampaignRepositoryInterface::class
+        );
+
+        $service = new CampaignService(
+            $campaignRepository
+        );
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage(
+            'Invalid presentation type and unlock method combination.'
+        );
+
+        $service->create(
+            'Test Campaign',
+            'content',
+            [
+                'cta_label' => 'Continue',
+                'destination_url' => 'https://example.com',
+            ],
+            'draft',
+            'timer'
+        );
+    }
+
+    public function testCreateAcceptsContentWithClickUnlock(): void
+    {
+        $campaignRepository = $this->createMock(
+            CampaignRepositoryInterface::class
+        );
+
+        $campaignRepository
+            ->expects($this->once())
+            ->method('create')
+            ->with(
+                'Test Campaign',
+                'content',
+                [
+                    'cta_label' => 'Continue',
+                    'destination_url' => 'https://example.com',
+                ],
+                'draft',
+                'click',
+                10,
+                'content',
+                null
+            )
+            ->willReturn(42);
+
+        $service = new CampaignService(
+            $campaignRepository
+        );
+
+        $result = $service->create(
+            'Test Campaign',
+            'content',
+            [
+                'cta_label' => 'Continue',
+                'destination_url' => 'https://example.com',
+            ],
+            'draft',
+            'click'
+        );
+
+        $this->assertSame(42, $result);
     }
 }

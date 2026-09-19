@@ -95,28 +95,21 @@ This keeps the schema small while preserving clear separation between the differ
 
 A campaign represents a configured Reward Gate experience.
 
-A campaign is the primary business object that defines:
+A campaign defines:
 
-- what is being gated
-- how the gate is presented
-- what action the visitor must complete
-- what reward is granted after successful completion
-- campaign status and basic limits
+* how the gate is presented;
+* what unlock method is used;
+* what reward is granted after successful completion;
+* campaign status and limits;
+* presentation-specific configuration where required.
 
-The MVP should keep campaign configuration relatively simple.
+The campaign does **not** own the customer's website content.
 
-Conceptually, a campaign contains:
+For Content / Read-more Gate, the article remains on the customer's website.
+Reward Gate stores only the configuration required to operate the gate.
 
-```text
-Campaign
-├── Presentation configuration
-├── Unlock configuration
-└── Reward configuration
-```
-
-The exact physical representation of these configurations will be determined during schema implementation.
-
-A campaign should have a stable identifier so that sessions, completions, analytics, and other records can reference it.
+A campaign should have a stable identifier so that unlock sessions,
+completions, analytics, and other records can reference it.
 
 ---
 
@@ -343,6 +336,11 @@ Campaign
 
 These configurations do not require independent reusable database records in the MVP.
 
+Presentation configuration is stored with the campaign.
+
+For Content / Read-more Gate, this configuration describes the gate behavior
+only. It does not contain the article or the protected portion of the article.
+
 The resulting model is:
 
 ```text
@@ -495,25 +493,67 @@ The exact physical columns will be determined during schema implementation.
 
 The campaign should identify which presentation is used.
 
-For the MVP:
+Presentation-specific settings are stored in the campaign's
+`presentation_settings` JSON field.
 
-```text
-popup
-content_gate
+The structure of this JSON depends on the presentation type.
+
+For example, Popup Gate settings may contain:
+
+```json
+{
+  "title": "Unlock Content",
+  "message": "Please wait while your content is being unlocked.",
+  "show_message": true,
+  "content": "<div>...</div>"
+}
 ```
 
-Presentation-specific configuration should only be stored where it is actually required.
+For Content / Read-more Gate, the settings contain only configuration for
+the gate itself.
 
-For example, a popup may eventually require configuration such as:
+Examples may include:
 
-- title
-- message
-- position
-- appearance
+```json
+{
+  "continue_text": "Continue reading"
+}
+```
 
-while a content gate may require different configuration.
+The Content Gate does **not** store article HTML, protected content,
+public content, or copies of customer website content in
+`presentation_settings`.
 
-The schema should not create a large collection of nullable columns for hypothetical presentation types.
+The Content Gate split-point and article content remain entirely on the
+customer's website.
+
+Presentation-specific settings should only be stored where they are
+actually required. The schema should not create a large collection of
+nullable columns for hypothetical presentation types.
+
+#### 5.1.1 Content Ownership Boundary
+
+Reward Gate and customer website content have separate responsibilities.
+
+Reward Gate database:
+
+* stores campaign configuration;
+* stores presentation configuration;
+* stores unlock and reward configuration;
+* stores unlock sessions and completions.
+
+Customer website:
+
+* stores the article/content;
+* determines the article structure;
+* places the Content Gate split-point;
+* serves the article HTML.
+
+The MVP does not copy, synchronize, parse, or manage the customer's article
+content in the Reward Gate database.
+
+The database therefore has no Content Gate article-content field or separate
+content table.
 
 ### 5.2 Unlock Configuration
 
@@ -569,6 +609,16 @@ may be preferable to a generic configuration table when the requirements are thi
 If configuration becomes genuinely dynamic as new product features are introduced, the schema can be extended based on the actual requirement.
 
 The MVP should not introduce a universal key/value or metadata system merely to avoid adding explicit columns later.
+
+Presentation-specific JSON should contain configuration rather than customer
+content.
+
+For example, `presentation_settings` may contain Popup Gate title/message
+settings or other presentation behavior, but Content / Read-more Gate does
+not use this field to store or transport article HTML.
+
+The application and frontend integration determine how Content Gate operates
+on content already present on the customer's page.
 
 ### 5.5 Campaign Changes
 
@@ -1467,24 +1517,33 @@ The MVP should not create tables for future features that are not required by th
 
 ### 15.1 Campaigns
 
-The `campaigns` table should contain the persistent configuration required to define a campaign.
+The `campaigns` table should contain the persistent configuration required to
+define a campaign.
 
 This may include:
 
-- campaign identity
-- name
-- status
-- presentation type
-- presentation configuration where required
-- unlock method
-- unlock configuration where required
-- reward type
-- reward configuration where required
-- campaign limits where required
-- creation timestamp
-- update timestamp
+* campaign identity;
+* name;
+* status;
+* presentation type;
+* presentation settings JSON;
+* unlock method;
+* unlock configuration where required;
+* timer duration;
+* frequency limits where required;
+* reward type;
+* reward configuration where required;
+* creation timestamp;
+* update timestamp.
 
-The exact fields should be based on the requirements in the specification and finalized during implementation.
+The `presentation_settings` JSON field stores presentation-specific
+configuration.
+
+For Content / Read-more Gate, it stores gate configuration only and does
+not contain customer article HTML.
+
+The exact fields should be based on the requirements in the specification
+and finalized during implementation.
 
 ### 15.2 Unlock Sessions
 

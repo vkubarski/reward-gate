@@ -5,5 +5,5 @@ declare(strict_types=1);
 return [
     'name' => 'Reward Gate',
     'environment' => 'development',
-    'version' => '0.1.0',
+    'version' => '0.2.0',
 ];

@@ -1,0 +1,92 @@
+:root {
+    --rg-sidebar-width: 240px;
+}
+
+body {
+    min-width: 320px;
+}
+
+.admin-sidebar {
+    width: var(--rg-sidebar-width);
+    background-color: var(--bs-tertiary-bg);
+    border-right: 1px solid var(--bs-border-color);
+}
+
+.admin-sidebar-header {
+    padding: 1.25rem 1rem;
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+.admin-sidebar-footer {
+    border-top: 1px solid var(--bs-border-color);
+}
+
+.admin-brand {
+    color: var(--bs-body-color);
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.admin-nav-section-title {
+    margin-bottom: 0.5rem;
+    padding: 0 0.75rem;
+    color: var(--bs-secondary-color);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.admin-nav-link {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 0.65rem 0.75rem;
+    border: 0;
+    border-radius: var(--bs-border-radius);
+    background: transparent;
+    color: var(--bs-body-color);
+    text-decoration: none;
+    text-align: left;
+}
+
+.admin-nav-link:hover {
+    background-color: var(--bs-secondary-bg);
+    color: var(--bs-body-color);
+}
+
+.admin-nav-button {
+    font: inherit;
+}
+
+.admin-topbar {
+    background-color: var(--bs-body-bg);
+    min-height: 64px;
+    padding: 0.75rem 0;
+}
+
+.admin-page-header {
+    margin-bottom: 1.5rem;
+}
+
+.admin-page-header h1 {
+    margin-bottom: 0;
+}
+
+.admin-auth-card {
+    width: min(100%, 420px);
+    margin: 0 auto;
+}
+
+.admin-table-card {
+    overflow: hidden;
+}
+
+@media (min-width: 992px) {
+    .admin-sidebar {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        flex: 0 0 var(--rg-sidebar-width);
+    }
+}

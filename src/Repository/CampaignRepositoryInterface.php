@@ -8,6 +8,8 @@ interface CampaignRepositoryInterface
 {
     public function findById(int $id): ?array;
 
+    public function findByIdForUpdate(int $id): ?array;
+
     public function create(
         string $name,
         string $presentationType,

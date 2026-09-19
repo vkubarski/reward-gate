@@ -22,4 +22,9 @@ interface UnlockCompletionRepositoryInterface
         string $visitorId,
         string $cutoff,
     ): int;
+
+    public function hasCompletionByCampaignAndVisitor(
+        int $campaignId,
+        string $visitorId,
+    ): bool;
 }

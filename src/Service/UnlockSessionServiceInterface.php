@@ -11,5 +11,13 @@ interface UnlockSessionServiceInterface
         ?string $visitorId = null,
     ): array;
 
-    public function complete(string $token): void;
+    public function complete(
+        string $token,
+        ?string $visitorId = null,
+    ): void;
+
+    public function status(
+        int $campaignId,
+        ?string $visitorId = null,
+    ): bool;
 }

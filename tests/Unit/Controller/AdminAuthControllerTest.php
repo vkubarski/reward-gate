@@ -15,7 +15,7 @@ final class AdminAuthControllerTest extends TestCase
 {
     private function createController(AdminAuthServiceInterface $adminAuthService, AdminSessionInterface $adminSession, CsrfTokenInterface $csrfToken): AdminAuthController
     {
-        return new AdminAuthController($adminAuthService, $adminSession, $csrfToken);
+        return new AdminAuthController($adminAuthService, $adminSession, $csrfToken, '0.2.0');
     } private function captureOutput(callable $callback): string
     {
         ob_start();
@@ -34,8 +34,8 @@ final class AdminAuthControllerTest extends TestCase
         $adminSession ->expects($this->once()) ->method('isAuthenticated') ->willReturn(false);
         $csrfToken = $this->createStub(CsrfTokenInterface::class);
         $output = $this->captureOutput(fn () => $this->createController($adminAuthService, $adminSession, $csrfToken)->showLogin());
-        $this->assertStringContainsString('<h1>Reward Gate</h1>', $output);
-        $this->assertStringContainsString('<h2>Admin Login</h2>', $output);
+        $this->assertStringContainsString('Reward Gate', $output);
+        $this->assertStringContainsString('Admin Login', $output);
         $this->assertStringContainsString('name="username"', $output);
         $this->assertStringContainsString('name="password"', $output);
     } public function testLoginRendersErrorWhenCredentialsAreMissing(): void

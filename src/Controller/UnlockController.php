@@ -54,6 +54,34 @@ final class UnlockController
         }
     }
 
+    public function status(array $params): void
+    {
+        try {
+            $campaignId = (int) $params['id'];
+            $visitorId = $this->visitorId->get();
+
+            $unlocked = $this->unlockSessionService->status(
+                $campaignId,
+                $visitorId
+            );
+
+            $this->json([
+                'success' => true,
+                'unlocked' => $unlocked,
+            ]);
+        } catch (InvalidArgumentException $exception) {
+            $this->json([
+                'success' => false,
+                'error' => $exception->getMessage(),
+            ], 400);
+        } catch (Throwable $exception) {
+            $this->json([
+                'success' => false,
+                'error' => 'Unable to determine unlock status.',
+            ], 500);
+        }
+    }
+
     public function complete(): void
     {
         try {
@@ -71,8 +99,9 @@ final class UnlockController
             }
 
             $token = $input['token'] ?? '';
+            $visitorId = $this->visitorId->get();
 
-            $this->unlockSessionService->complete($token);
+            $this->unlockSessionService->complete($token, $visitorId);
 
             $this->json([
                 'success' => true,

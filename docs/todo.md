@@ -19,40 +19,41 @@ This document tracks implementation progress and the remaining work required to 
 
 ### 1.1 Repository
 
-- [x] Initialize Git repository
-- [x] Rename default branch to `main`
-- [x] Create private GitHub repository
-- [x] Connect local repository to GitHub
-- [x] Verify push/pull workflow
+* [x] Initialize Git repository
+* [x] Rename default branch to `main`
+* [x] Create private GitHub repository
+* [x] Connect local repository to GitHub
+* [x] Verify push/pull workflow
 
 ### 1.2 Git Configuration
 
-- [x] Create `.gitignore`
-- [x] Ignore `vendor/`
-- [x] Ignore `private/`
-- [x] Ignore `.php-cs-fixer.cache`
-- [x] Ignore environment files
-- [x] Ignore operating-system files
-- [ ] Review `.gitignore` before first commercial release
+* [x] Create `.gitignore`
+* [x] Ignore `vendor/`
+* [x] Ignore `private/`
+* [x] Ignore `.php-cs-fixer.cache`
+* [x] Ignore environment files
+* [x] Ignore operating-system files
+* [x] Ignore local editor/development files
+* [ ] Review `.gitignore` before first commercial release
 
 ### 1.3 Project Structure
 
-- [x] Create `src/`
-- [x] Create `public/`
-- [x] Create `config/`
-- [x] Create `database/`
-- [x] Create `tests/`
-- [x] Create `docs/`
-- [x] Create `private/`
-- [x] Create `storage/` if required
+* [x] Create `src/`
+* [x] Create `public/`
+* [x] Create `config/`
+* [x] Create `database/`
+* [x] Create `tests/`
+* [x] Create `docs/`
+* [x] Create `private/`
+* [x] Create `storage/` if required
 
 ### 1.4 Documentation
 
-- [x] Create `README.md`
-- [x] Create `docs/specification.md`
-- [x] Create `docs/architecture.md`
-- [x] Create `docs/database.md`
-- [x] Create `docs/todo.md`
+* [x] Create `README.md`
+* [x] Create `docs/specification.md`
+* [x] Create `docs/architecture.md`
+* [x] Create `docs/database.md`
+* [x] Create `docs/todo.md`
 
 ---
 
@@ -60,49 +61,52 @@ This document tracks implementation progress and the remaining work required to 
 
 ### 2.1 PHP
 
-- [x] PHP development environment
-- [x] Composer
-- [x] Composer autoloading
-- [x] Establish minimum supported PHP version
-- [ ] Confirm final supported PHP version range
-- [ ] Test against supported PHP versions
+* [x] PHP development environment
+* [x] Composer
+* [x] Composer autoloading
+* [x] Establish minimum supported PHP version
+* [ ] Confirm final supported PHP version range
+* [ ] Test against supported PHP versions
 
 ### 2.2 Static Analysis
 
-- [x] PHPStan
-- [x] PHPStan configuration
-- [ ] Establish initial PHPStan baseline
-- [ ] Increase PHPStan strictness as codebase grows
-- [ ] Ensure production code passes PHPStan
+* [x] PHPStan
+* [x] PHPStan configuration
+* [ ] Establish initial PHPStan baseline
+* [ ] Increase PHPStan strictness as codebase grows
+* [ ] Ensure production code passes PHPStan
 
 ### 2.3 Formatting
 
-- [x] PHP-CS-Fixer
-- [x] PHP-CS-Fixer configuration
-- [ ] Establish final project coding standard
-- [ ] Ensure production PHP code passes PHP-CS-Fixer
+* [x] PHP-CS-Fixer
+* [x] PHP-CS-Fixer configuration
+* [ ] Establish final project coding standard
+* [ ] Ensure production PHP code passes PHP-CS-Fixer
 
 ### 2.4 Editor / IDE
 
-- [x] Intelephense
-- [x] Treesitter
-- [ ] Configure Xdebug if required
-- [ ] Configure `nvim-dap` if required
+* [x] Intelephense
+* [x] Treesitter
+* [ ] Configure Xdebug if required
+* [ ] Configure `nvim-dap` if required
 
 ### 2.5 Testing
 
-- [x] Install/configure PHPUnit
-- [x] Establish test directory structure
-- [x] Create first automated test
-- [x] Define unit/integration testing approach
-- [x] Configure test database
-- [x] Configure Composer test commands
-- [x] Unit-test services
-- [x] Integration-test repositories
-- [x] Integration-test service/database interactions
-- [x] Unit-test authentication/security components
-- [x] Unit-test controllers
-- [x] Review important untested application areas
+* [x] Install/configure PHPUnit
+* [x] Establish test directory structure
+* [x] Create first automated test
+* [x] Define unit/integration testing approach
+* [x] Configure test database
+* [x] Configure Composer test commands
+* [x] Unit-test services
+* [x] Integration-test repositories
+* [x] Integration-test service/database interactions
+* [x] Unit-test authentication/security components
+* [x] Unit-test controllers
+* [x] Review important untested application areas
+* [x] Test campaign presentation-settings normalization
+* [x] Test campaign frequency-limit handling
+* [x] Test popup-related controller behavior
 
 ---
 
@@ -110,44 +114,49 @@ This document tracks implementation progress and the remaining work required to 
 
 ### 3.1 Bootstrap
 
-- [x] Create application bootstrap
-- [x] Configure Composer autoloading
-- [x] Establish application entry point
-- [x] Establish configuration loading
-- [ ] Establish environment configuration where required
-- [ ] Establish production error handling
-- [ ] Establish application logging if required
+* [x] Create application bootstrap
+* [x] Configure Composer autoloading
+* [x] Establish application entry point
+* [x] Establish configuration loading
+* [ ] Establish environment configuration where required
+* [ ] Establish production error handling
+* [ ] Establish application logging if required
 
 ### 3.2 HTTP Layer
 
-- [x] Define routing approach
-- [x] Implement HTTP method handling
-- [x] Implement route registration through `config/routes.php`
-- [x] Implement controller dispatch
-- [x] Implement JSON responses
-- [x] Implement basic request handling
-- [ ] Review and improve input validation as features are added
-- [x] Support trailing-slash routes
-- [x] Unit-test router behavior
+* [x] Define routing approach
+* [x] Implement HTTP method handling
+* [x] Implement route registration through `config/routes.php`
+* [x] Implement controller dispatch
+* [x] Implement JSON responses
+* [x] Implement basic request handling
+* [ ] Review and improve input validation as features are added
+* [x] Support trailing-slash routes
+* [x] Unit-test router behavior
+* [x] Add visitor/demo route used for local popup testing
 
 ### 3.3 Database
 
-- [x] Configure PDO
-- [x] Establish database connection
-- [x] Configure database credentials
-- [x] Use prepared SQL statements
-- [ ] Establish reusable transaction handling where required
-- [x] Test database connection locally
-- [x] Test database connection on demo server
+* [x] Configure PDO
+* [x] Establish database connection
+* [x] Configure database credentials
+* [x] Use prepared SQL statements
+* [ ] Establish reusable transaction handling where required
+* [x] Test database connection locally
+* [x] Test database connection on demo server
 
 ### 3.4 Presentation
 
-- [x] Establish Controller → View architecture
-- [x] Establish shared `layout.php`
-- [x] Move document structure into layout
-- [x] Remove duplicated `<html>`, `<head>` and `<body>` structures from views
-- [x] Establish campaign views
-- [x] Establish shared rendering approach
+* [x] Establish Controller → View architecture
+* [x] Establish shared `layout.php`
+* [x] Move document structure into layout
+* [x] Remove duplicated `<html>`, `<head>` and `<body>` structures from views
+* [x] Establish campaign views
+* [x] Establish shared rendering approach
+* [x] Establish dedicated admin layout
+* [x] Establish dedicated authentication layout
+* [x] Establish responsive admin navigation
+* [x] Establish admin theme selection with system/light/dark modes
 
 ---
 
@@ -155,40 +164,40 @@ This document tracks implementation progress and the remaining work required to 
 
 ### 4.1 Migration System
 
-- [x] Select migration approach
-- [x] Create migration directory
-- [x] Create migration tracking mechanism
-- [x] Create initial migration
-- [x] Test migrations on a clean database
-- [x] Test migration upgrades
+* [x] Select migration approach
+* [x] Create migration directory
+* [x] Create migration tracking mechanism
+* [x] Create initial migration
+* [x] Test migrations on a clean database
+* [x] Test migration upgrades
 
 ### 4.2 Core Tables
 
-- [x] Create `campaigns`
-- [x] Create `unlock_sessions`
-- [x] Create `unlock_completions`
-- [x] Create `admin_users`
+* [x] Create `campaigns`
+* [x] Create `unlock_sessions`
+* [x] Create `unlock_completions`
+* [x] Create `admin_users`
 
 ### 4.3 Constraints and Indexes
 
-- [x] Add primary keys
-- [x] Add foreign keys
-- [x] Add unique constraints
-- [x] Add required indexes
-- [x] Review cascade/delete behavior
-- [x] Review timestamp fields
-- [x] Review replay-prevention constraints
+* [x] Add primary keys
+* [x] Add foreign keys
+* [x] Add unique constraints
+* [x] Add required indexes
+* [x] Review cascade/delete behavior
+* [x] Review timestamp fields
+* [x] Review replay-prevention constraints
 
 ### 4.4 Database Verification
 
-- [x] Verify complete schema locally
-- [x] Verify relationships
-- [x] Verify replay-prevention constraints
-- [x] Export schema/data for demo deployment
-- [x] Deploy database to demo server
-- [x] Verify session/completion lifecycle locally
-- [ ] Verify session/completion lifecycle remotely
-- [ ] Verify migration rollback behavior where supported
+* [x] Verify complete schema locally
+* [x] Verify relationships
+* [x] Verify replay-prevention constraints
+* [x] Export schema/data for demo deployment
+* [x] Deploy database to demo server
+* [x] Verify session/completion lifecycle locally
+* [ ] Verify session/completion lifecycle remotely
+* [ ] Verify migration rollback behavior where supported
 
 ---
 
@@ -196,47 +205,54 @@ This document tracks implementation progress and the remaining work required to 
 
 ### 5.1 Campaign
 
-- [x] Define campaign persistence model
-- [x] Implement campaign repository
-- [x] Implement campaign controller
-- [x] Implement campaign list
-- [x] Implement campaign detail view
-- [x] Implement campaign creation
-- [ ] Implement campaign editing
-- [ ] Implement campaign activation/deactivation
-- [ ] Implement campaign archive/delete behavior
+* [x] Define campaign persistence model
+* [x] Implement campaign repository
+* [x] Implement campaign controller
+* [x] Implement campaign list
+* [x] Implement campaign detail view
+* [x] Implement campaign creation
+* [x] Implement campaign editing
+* [x] Implement campaign activation/deactivation
+* [x] Implement campaign archive behavior
+* [x] Define campaign lifecycle rules
+* [x] Implement presentation-settings normalization
+* [x] Implement popup presentation settings
+* [x] Implement campaign frequency-limit configuration
+* [x] Preserve unlimited frequency behavior with `NULL`
+* [ ] Decide whether hard-delete is required for MVP
+* [ ] Review campaign lifecycle edge cases
 
 ### 5.2 Unlock Session
 
-- [x] Define unlock-session domain rules
-- [x] Implement unlock-session repository
-- [x] Implement secure session creation
-- [x] Generate secure unlock token
-- [x] Store server-side start timestamp
-- [x] Define session expiration
-- [x] Implement session lookup
-- [x] Implement session validation
+* [x] Define unlock-session domain rules
+* [x] Implement unlock-session repository
+* [x] Implement secure session creation
+* [x] Generate secure unlock token
+* [x] Store server-side start timestamp
+* [x] Define session expiration
+* [x] Implement session lookup
+* [x] Implement session validation
 
 ### 5.3 Unlock Completion
 
-- [x] Define completion rules
-- [x] Implement completion repository
-- [x] Implement server-side completion verification
-- [x] Implement one-time completion
-- [x] Prevent replay
-- [x] Record completion timestamp
-- [x] Handle expired sessions
-- [x] Handle invalid sessions
+* [x] Define completion rules
+* [x] Implement completion repository
+* [x] Implement server-side completion verification
+* [x] Implement one-time completion
+* [x] Prevent replay
+* [x] Record completion timestamp
+* [x] Handle expired sessions
+* [x] Handle invalid sessions
 
 ### 5.4 Timer Unlock
 
-- [x] Define timer unlock interface/boundary
-- [x] Define minimum completion time
-- [x] Create unlock-session flow
-- [x] Start timer on client
-- [x] Verify elapsed time on server
-- [x] Reject premature completion
-- [x] Complete unlock after server verification
+* [x] Define timer unlock interface/boundary
+* [x] Define minimum completion time
+* [x] Create unlock-session flow
+* [x] Start timer on client
+* [x] Verify elapsed time on server
+* [x] Reject premature completion
+* [x] Complete unlock after server verification
 
 ### 5.5 Reward / Unlock Result
 
@@ -246,9 +262,9 @@ The MVP reward is simply:
 
 > **Unlock/reveal the protected content.**
 
-- [x] Define unlock result
-- [x] Return successful unlock state
-- [x] Ensure presentation code does not contain unlock business logic
+* [x] Define unlock result
+* [x] Return successful unlock state
+* [x] Ensure presentation code does not contain unlock business logic
 
 ---
 
@@ -256,32 +272,43 @@ The MVP reward is simply:
 
 ### 6.1 Authentication
 
-- [x] Define administrator authentication
-- [x] Implement login
-- [x] Implement logout
-- [x] Implement password hashing
-- [x] Implement secure admin sessions
-- [x] Implement authentication guard
-- [x] Protect admin routes
+* [x] Define administrator authentication
+* [x] Implement login
+* [x] Implement logout
+* [x] Implement password hashing
+* [x] Implement secure admin sessions
+* [x] Implement authentication guard
+* [x] Protect admin routes
 
 ### 6.2 Campaign Management
 
-- [x] Campaign list
-- [x] Campaign detail
-- [x] Create campaign
-- [ ] Edit campaign
-- [ ] Enable/disable campaign
-- [ ] Archive/delete campaign
-- [x] Configure timer duration
-- [x] Configure presentation type
+* [x] Campaign list
+* [x] Campaign detail
+* [x] Create campaign
+* [x] Edit campaign
+* [x] Enable/disable campaign
+* [x] Archive campaign
+* [x] Configure timer duration
+* [x] Configure presentation type
+* [x] Configure popup title
+* [x] Configure popup message
+* [x] Configure popup message visibility
+* [x] Configure popup content/ad code
+* [x] Configure frequency limit
+* [x] Allow unlimited frequency by leaving frequency limit empty
 
 ### 6.3 Admin UI
 
-- [x] Establish basic admin layout
-- [ ] Create navigation
-- [ ] Create reusable form structure
-- [ ] Create validation/error display
-- [ ] Ensure basic mobile usability
+* [x] Establish basic admin layout
+* [x] Create navigation
+* [x] Create reusable campaign form structure
+* [x] Create validation/error display
+* [x] Ensure basic mobile usability
+* [x] Add responsive sidebar/offcanvas navigation
+* [x] Add appearance/theme controls
+* [ ] Refine final visual theme
+* [ ] Add final Reward Gate logo/branding
+* [ ] Add favicon
 
 A dashboard is not required for the MVP.
 
@@ -291,63 +318,115 @@ A dashboard is not required for the MVP.
 
 ### 7.1 Presentation
 
-- [x] Create initial popup gate HTML structure
-- [x] Create popup gate CSS
-- [x] Create popup gate JavaScript
-- [x] Implement open/close behavior
-- [x] Prevent protected interaction while locked
-- [x] Ensure responsive behavior
-- [x] Load popup configuration from campaign data
-- [x] Keep visitor-facing campaign configuration separate from admin endpoints
+* [x] Create initial popup gate HTML structure
+* [x] Create popup gate CSS
+* [x] Create popup gate JavaScript
+* [x] Implement open/close behavior
+* [x] Prevent protected interaction while locked
+* [x] Ensure responsive behavior
+* [x] Load popup configuration from campaign data
+* [x] Keep visitor-facing campaign configuration separate from admin endpoints
+* [x] Support configurable title
+* [x] Support configurable message
+* [x] Support hiding the message
+* [x] Support arbitrary trusted HTML popup content
+* [x] Support image content
+* [x] Support iframe/embed content
+* [x] Support trusted embedded JavaScript
+* [x] Deliberately mount embedded `<script>` elements
+* [x] Render title/message as text rather than trusted HTML
+* [x] Handle campaign-loading errors
+* [x] Handle unlock-start errors
+* [x] Prevent secondary JavaScript errors when the popup has not yet been created
 
 ### 7.2 Unlock Flow
 
-- [x] Create unlock session from popup
-- [x] Display timer
-- [x] Prevent client-side timer manipulation from granting unlock
-- [x] Report completion to server
-- [x] Handle verification response
-- [x] Unlock protected content automatically
+* [x] Create unlock session from popup
+* [x] Display timer
+* [x] Prevent client-side timer manipulation from granting unlock
+* [x] Report completion to server
+* [x] Handle verification response
+* [x] Unlock protected content automatically
+* [x] Enforce campaign frequency limit
 
 ### 7.3 UX
 
-- [ ] Explain required action clearly
-- [ ] Display clear countdown/progress
-- [ ] Display completion state
-- [ ] Display failure/expired state
-- [ ] Avoid deceptive UI
-- [ ] Test desktop
-- [ ] Test mobile
+* [ ] Explain required action clearly
+* [x] Display clear countdown/progress
+* [ ] Display completion state
+* [x] Display failure state
+* [ ] Display dedicated expired state
+* [x] Avoid deceptive UI
+* [x] Test desktop
+* [x] Test mobile
+* [ ] Perform final UX review
 
 ---
 
 ## 8. Content / Read-more Gate
 
-### 8.1 Presentation
+The MVP Content Gate is a client-side visibility gate. Reward Gate does not store,
+copy, parse, or serve the customer’s article content.
 
-- [ ] Define content-gate HTML structure
-- [ ] Define visible-content area
-- [ ] Define protected-content area
-- [ ] Create gate control
-- [ ] Create CSS
-- [ ] Create JavaScript
+The customer page contains the article and an empty split-point element. The gate
+CSS hides following siblings before JavaScript runs, and the gate JavaScript
+renders the unlock UI inside the split point. After server-verified completion,
+the original DOM is revealed in place.
+
+### 8.1 Presentation Contract
+
+* [ ] Define the Content Gate split-point HTML contract
+* [ ] Use one empty `<div data-reward-gate data-campaign-id="...">` at the cut point
+* [ ] Define following-sibling visibility behavior
+* [ ] Create Content Gate CSS
+* [ ] Ensure Content Gate CSS loads before protected content can render
+* [ ] Keep protected article HTML in the customer page rather than Reward Gate DB
+* [ ] Create Content Gate JavaScript
+* [ ] Render gate UI inline at the split point
+* [ ] Keep the original customer DOM intact
+* [ ] Set an explicit unlocked state on successful completion
+* [ ] Support one Content Gate per page for MVP
 
 ### 8.2 Unlock Flow
 
-- [ ] Display initial visible content
-- [ ] Hide protected content
-- [ ] Display Continue Reading / Unlock control
-- [ ] Start unlock session
-- [ ] Display timer
-- [ ] Verify completion server-side
-- [ ] Reveal protected content
+* [ ] Load and validate the campaign
+* [ ] Verify the campaign is configured for Content Gate presentation
+* [ ] Verify the supported unlock method
+* [ ] Start unlock session using the shared unlock protocol
+* [ ] Display the timer inline
+* [ ] Request completion from the server
+* [ ] Verify completion server-side
+* [ ] Reveal protected content after successful completion
+* [ ] Keep protected content hidden when initialization fails
+* [ ] Display a safe inline error when the gate cannot initialize
+* [ ] Handle invalid/missing campaign configuration without exposing content
+* [ ] Handle incorrect gate placement safely
 
-### 8.3 Configuration
+### 8.3 JavaScript / Shared Unlock
 
-- [ ] Define visible-content configuration
-- [ ] Determine default visible-content behavior
-- [ ] Determine whether configurable percentage is required for MVP
-- [ ] Ensure Content Gate uses the shared unlock engine
+* [ ] Inspect the existing Popup unlock flow and identify the genuinely shared protocol
+* [ ] Extract a small shared client-side unlock helper where duplication is real
+* [ ] Keep presentation-specific UI logic outside the shared unlock helper
+* [ ] Ensure Content Gate and Popup Gate use the same server verification rules
+* [ ] Avoid creating a generic frontend framework or speculative abstraction
+
+### 8.4 Configuration
+
+* [x] Define that Content Gate configuration belongs to the campaign
+* [x] Define that `presentation_settings` does not store customer article HTML
+* [ ] Define any remaining Content Gate presentation settings required for MVP
+* [ ] Ensure no percentage-based or selector-based article splitting is required for MVP
+* [ ] Ensure Content Gate uses the shared unlock protocol
+
+### 8.5 Browser / Compatibility Tests
+
+* [ ] Verify protected content stays hidden with JavaScript disabled
+* [ ] Verify protected content stays hidden while the gate is initializing
+* [ ] Verify successful unlock reveals the original DOM without rebuilding it
+* [ ] Verify desktop behavior
+* [ ] Verify mobile behavior
+* [ ] Verify timer manipulation cannot directly grant unlock
+* [ ] Verify replay/frequency rules match Popup Gate behavior
 
 ---
 
@@ -355,48 +434,50 @@ A dashboard is not required for the MVP.
 
 ### 9.1 Server Authority
 
-- [x] Server determines session validity
-- [x] Server determines minimum completion time
-- [x] Server determines completion eligibility
-- [x] Client-side state cannot directly grant unlock
+* [x] Server determines session validity
+* [x] Server determines minimum completion time
+* [x] Server determines completion eligibility
+* [x] Client-side state cannot directly grant unlock
 
 ### 9.2 Session Security
 
-- [x] Generate cryptographically secure session identifiers
-- [x] Use secure token handling
-- [x] Store only necessary sensitive token material
-- [x] Implement session expiration
-- [x] Implement one-time completion
-- [x] Prevent replay
+* [x] Generate cryptographically secure session identifiers
+* [x] Use secure token handling
+* [x] Store only necessary sensitive token material
+* [x] Implement session expiration
+* [x] Implement one-time completion
+* [x] Prevent replay
 
 ### 9.3 Request Security
 
-- [x] Validate all user input
-- [x] Prevent unauthorized campaign access
-- [x] Implement CSRF protection for state-changing admin requests
-- [x] Use prepared SQL statements
-- [x] Escape output appropriately
-- [x] Protect internal application files from direct HTTP access
+* [x] Validate all user input
+* [x] Prevent unauthorized campaign access
+* [x] Implement CSRF protection for state-changing admin requests
+* [x] Use prepared SQL statements
+* [x] Escape output appropriately
+* [x] Protect internal application files from direct HTTP access
 
 ### 9.4 Anti-Abuse
 
-- [x] Implement basic visitor/session frequency limiting
-- [x] Define applicable campaign limits
-- [x] Prevent repeated completion
-- [x] Handle expired sessions
-- [ ] Record verification failures where useful
-- [ ] Review visitor identification strategy for privacy and production use
-- [ ] Define visitor identification and frequency-limiting strategy for production, including privacy, proxy/IP handling, rotation, and abuse resistance
+* [x] Implement basic visitor/session frequency limiting
+* [x] Define applicable campaign limits
+* [x] Prevent repeated completion
+* [x] Handle expired sessions
+* [ ] Record verification failures where useful
+* [ ] Review visitor identification strategy for privacy and production use
+* [ ] Define visitor identification and frequency-limiting strategy for production, including privacy, proxy/IP handling, rotation, and abuse resistance
 
 ### 9.5 Security Review
 
-- [ ] Perform manual security review
-- [x] Review authentication
-- [x] Review authorization
-- [x] Review session handling
-- [x] Review database access
-- [x] Review public/private directory handling
-- [ ] Review production configuration
+* [ ] Perform manual security review
+* [x] Review authentication
+* [x] Review authorization
+* [x] Review session handling
+* [x] Review database access
+* [x] Review public/private directory handling
+* [ ] Review production configuration
+* [ ] Review trusted executable popup content security implications
+* [ ] Review Content Gate client-side visibility limitations and document the security boundary clearly
 
 ---
 
@@ -404,40 +485,42 @@ A dashboard is not required for the MVP.
 
 ### 10.1 Apache
 
-- [x] Configure local Apache virtual host
-- [x] Configure Apache front-controller routing
-- [x] Verify `mod_rewrite`
-- [x] Create root `.htaccess`
-- [x] Create protection rules for sensitive files
-- [x] Create directory protection rules
-- [x] Test campaign routes locally
+* [x] Configure local Apache virtual host
+* [x] Configure Apache front-controller routing
+* [x] Verify `mod_rewrite`
+* [x] Create root `.htaccess`
+* [x] Create protection rules for sensitive files
+* [x] Create directory protection rules
+* [x] Test campaign routes locally
+* [x] Test visitor/demo route locally
+* [x] Test local visitor access from a mobile device
 
 ### 10.2 Shared Hosting
 
-- [x] Deploy application to demo server
-- [x] Resolve `open_basedir` restrictions
-- [x] Deploy application inside `public_html`
-- [x] Configure database connection
-- [x] Deploy database
-- [x] Verify PHP execution
-- [x] Verify front-controller routing
-- [x] Verify campaign routes
-- [x] Verify HTTPS
-- [x] Protect internal application files
-- [ ] Test complete visitor workflow remotely
+* [x] Deploy application to demo server
+* [x] Resolve `open_basedir` restrictions
+* [x] Deploy application inside `public_html`
+* [x] Configure database connection
+* [x] Deploy database
+* [x] Verify PHP execution
+* [x] Verify front-controller routing
+* [x] Verify campaign routes
+* [x] Verify HTTPS
+* [x] Protect internal application files
+* [ ] Test complete visitor workflow remotely
 
 ### 10.3 Nginx
 
-- [ ] Install Nginx locally
-- [ ] Configure PHP-FPM
-- [ ] Create Nginx server configuration
-- [ ] Configure front-controller routing
-- [ ] Configure direct-access protection
-- [ ] Test static assets
-- [ ] Test existing files
-- [ ] Test trailing-slash routes
-- [ ] Test 404 handling
-- [ ] Document Nginx deployment requirements
+* [ ] Install Nginx locally
+* [ ] Configure PHP-FPM
+* [ ] Create Nginx server configuration
+* [ ] Configure front-controller routing
+* [ ] Configure direct-access protection
+* [ ] Test static assets
+* [ ] Test existing files
+* [ ] Test trailing-slash routes
+* [ ] Test 404 handling
+* [ ] Document Nginx deployment requirements
 
 ---
 
@@ -445,52 +528,62 @@ A dashboard is not required for the MVP.
 
 ### 11.1 Automated Tests
 
-- [x] Install/configure PHPUnit
-- [x] Test Router
-- [x] Test campaign repository
-- [x] Test campaign logic
-- [x] Test timer logic
-- [x] Test unlock-session creation
-- [x] Test session validation
-- [x] Test completion validation
-- [x] Test replay prevention
-- [x] Test authentication
-- [x] Test security components
-- [x] Test controllers
+* [x] Install/configure PHPUnit
+* [x] Test Router
+* [x] Test campaign repository
+* [x] Test campaign logic
+* [x] Test timer logic
+* [x] Test unlock-session creation
+* [x] Test session validation
+* [x] Test completion validation
+* [x] Test replay prevention
+* [x] Test authentication
+* [x] Test security components
+* [x] Test controllers
+* [x] Test presentation-settings normalization
+* [x] Test frequency-limit input handling
 
 Current automated test suite:
 
-- [x] Unit tests
-- [x] Integration tests
-- [x] Controller tests
-- [x] Authentication/security tests
-- [x] Composer test commands
-- [x] Full test suite passing
+* [x] Unit tests
+* [x] Integration tests
+* [x] Controller tests
+* [x] Authentication/security tests
+* [x] Composer test commands
+* [x] Full test suite passing
 
 Current verified baseline:
 
-> **137 tests, 542 assertions**
+> **106 tests, 506 assertions**
 
 ### 11.2 Integration Tests
 
-- [x] Test database operations
-- [x] Test session creation
-- [x] Test completion flow
-- [x] Test authentication repository
-- [x] Test campaign management repository
-- [x] Test complete timer unlock service flow
+* [x] Test database operations
+* [x] Test session creation
+* [x] Test completion flow
+* [x] Test authentication repository
+* [x] Test campaign management repository
+* [x] Test complete timer unlock service flow
 
 ### 11.3 End-to-End Tests
 
-- [ ] Visitor encounters gate
-- [ ] Visitor starts unlock
-- [ ] Timer completes
-- [ ] Server verifies completion
-- [ ] Protected content unlocks
-- [ ] Replay attempt fails
-- [ ] Expired session fails
-- [ ] Manipulated client timer fails
-- [ ] Multiple completion attempts fail
+* [x] Visitor encounters gate locally
+* [x] Visitor starts unlock locally
+* [x] Timer completes locally
+* [x] Server verifies completion locally
+* [x] Protected content unlocks locally
+* [x] Replay attempt fails
+* [x] Expired/invalid session paths are implemented
+* [x] Manipulated client timer cannot directly grant unlock
+* [x] Multiple completion attempts fail
+* [x] Frequency-limit rejection tested
+* [x] Popup content HTML tested
+* [x] Popup image content tested
+* [x] Popup iframe content tested
+* [x] Popup embedded JavaScript tested
+* [x] Popup error handling tested
+* [ ] Formal repeatable browser/E2E test procedure
+* [ ] Verify complete workflow remotely
 
 ---
 
@@ -498,24 +591,33 @@ Current verified baseline:
 
 ### 12.1 Local
 
-- [x] Create local database
-- [x] Create development/test data
-- [x] Create demo campaign
-- [ ] Create demo protected content
-- [ ] Verify complete visitor workflow
+* [x] Create local database
+* [x] Create development/test data
+* [x] Create demo campaign
+* [x] Create demo protected content
+* [x] Create local demo route
+* [x] Verify Popup Gate visitor workflow locally
+* [x] Verify Popup Gate on desktop
+* [x] Verify Popup Gate on phone
+* [ ] Create dedicated Content Gate demo page
+* [ ] Verify Content Gate with JavaScript disabled
+* [ ] Verify Content Gate visitor workflow locally
+* [ ] Verify Content Gate on desktop
+* [ ] Verify Content Gate on phone
+* [ ] Finalize demo data/setup procedure
 
 ### 12.2 Remote
 
-- [x] Deploy application
-- [x] Deploy database
-- [x] Verify HTTPS
-- [ ] Test Popup Gate remotely
-- [ ] Test Content Gate remotely
-- [ ] Test expired sessions
-- [ ] Test replay attempts
-- [ ] Test manipulated timer
-- [ ] Test multiple completion attempts
-- [ ] Test mobile devices
+* [x] Deploy application
+* [x] Deploy database
+* [x] Verify HTTPS
+* [ ] Test Popup Gate remotely
+* [ ] Test Content Gate remotely
+* [ ] Test expired sessions
+* [ ] Test replay attempts
+* [ ] Test manipulated timer
+* [ ] Test multiple completion attempts
+* [ ] Test mobile devices
 
 ---
 
@@ -525,57 +627,57 @@ These features remain intentionally deferred until the MVP is working.
 
 ### 13.1 Campaign Features
 
-- [ ] Multiple campaigns
-- [ ] Campaign activation/deactivation improvements
-- [ ] Campaign duplication
-- [ ] Campaign scheduling
-- [ ] Campaign targeting
-- [ ] Campaign usage limits
-- [ ] Campaign status management
+* [ ] Multiple campaigns
+* [ ] Campaign activation/deactivation improvements
+* [ ] Campaign duplication
+* [ ] Campaign scheduling
+* [ ] Campaign targeting
+* [ ] Campaign usage limits
+* [ ] Campaign status management improvements
 
 ### 13.2 Analytics
 
-- [ ] Visitors
-- [ ] Gates shown
-- [ ] Unlocks started
-- [ ] Unlocks completed
-- [ ] Completion rate
-- [ ] Abandonment rate
-- [ ] Revenue metrics where applicable
-- [ ] Performance by unlock method
+* [ ] Visitors
+* [ ] Gates shown
+* [ ] Unlocks started
+* [ ] Unlocks completed
+* [ ] Completion rate
+* [ ] Abandonment rate
+* [ ] Revenue metrics where applicable
+* [ ] Performance by unlock method
 
 ### 13.3 Customization
 
-- [ ] Popup customization
-- [ ] Content gate customization
-- [ ] Colors
-- [ ] Typography
-- [ ] Button styles
-- [ ] Messages
-- [ ] Timer configuration
-- [ ] Visible-content configuration
+* [ ] Popup customization
+* [ ] Content gate customization
+* [ ] Colors
+* [ ] Typography
+* [ ] Button styles
+* [ ] Messages
+* [ ] Timer configuration
+* [ ] Visible-content configuration
 
 ### 13.4 Advanced / Killer Features
 
 Deferred until the basic product has been validated.
 
-- [ ] Smart Reward Routing
-- [ ] Campaign Objectives
-- [ ] Reward Gate Recipes
-- [ ] Revenue Analytics
-- [ ] Automatic Recommendations
-- [ ] Campaign Health Warnings
-- [ ] A/B Testing
-- [ ] Smart Fallbacks
-- [ ] Zero-Configuration Starter Campaign
-- [ ] Explain My Campaign
-- [ ] Goal-Based Optimization
-- [ ] Revenue vs. UX Balancing
-- [ ] Automatic Method Optimization
-- [ ] Predictive Recommendations
-- [ ] Campaign Performance Intelligence
-- [ ] Automatic Campaign Optimization
-- [ ] Adaptive Campaigns
+* [ ] Smart Reward Routing
+* [ ] Campaign Objectives
+* [ ] Reward Gate Recipes
+* [ ] Revenue Analytics
+* [ ] Automatic Recommendations
+* [ ] Campaign Health Warnings
+* [ ] A/B Testing
+* [ ] Smart Fallbacks
+* [ ] Zero-Configuration Starter Campaign
+* [ ] Explain My Campaign
+* [ ] Goal-Based Optimization
+* [ ] Revenue vs. UX Balancing
+* [ ] Automatic Method Optimization
+* [ ] Predictive Recommendations
+* [ ] Campaign Performance Intelligence
+* [ ] Automatic Campaign Optimization
+* [ ] Adaptive Campaigns
 
 ---
 
@@ -583,35 +685,35 @@ Deferred until the basic product has been validated.
 
 ### 14.1 Self-Hosted Distribution
 
-- [ ] Define release package structure
-- [ ] Include production Composer dependencies
-- [ ] Exclude development dependencies
-- [ ] Define Apache deployment package
-- [ ] Define Nginx deployment package
-- [ ] Ensure application files are protected
-- [ ] Create installation instructions
-- [ ] Create upgrade instructions
-- [ ] Create server requirements documentation
-- [ ] Test installation on clean hosting environment
+* [ ] Define release package structure
+* [ ] Include production Composer dependencies
+* [ ] Exclude development dependencies
+* [ ] Define Apache deployment package
+* [ ] Define Nginx deployment package
+* [ ] Ensure application files are protected
+* [ ] Create installation instructions
+* [ ] Create upgrade instructions
+* [ ] Create server requirements documentation
+* [ ] Test installation on clean hosting environment
 
 ### 14.2 Installation
 
 Deferred until the MVP deployment process is stable.
 
-- [ ] Installation wizard
-- [ ] Environment checks
-- [ ] Database configuration
-- [ ] Database migrations
-- [ ] Administrator account creation
-- [ ] Initial configuration
-- [ ] Demo data option
+* [ ] Installation wizard
+* [ ] Environment checks
+* [ ] Database configuration
+* [ ] Database migrations
+* [ ] Administrator account creation
+* [ ] Initial configuration
+* [ ] Demo data option
 
 ### 14.3 Licensing
 
-- [ ] Determine licensing model
-- [ ] Determine license-key requirements
-- [ ] Determine update mechanism
-- [ ] Determine domain activation requirements
+* [ ] Determine licensing model
+* [ ] Determine license-key requirements
+* [ ] Determine update mechanism
+* [ ] Determine domain activation requirements
 
 Licensing should not be implemented until the commercial model has been validated.
 
@@ -621,46 +723,46 @@ Licensing should not be implemented until the commercial model has been validate
 
 ### 15.1 WordPress
 
-- [ ] Design WordPress integration
-- [ ] Implement WordPress plugin
-- [ ] Native campaign configuration
-- [ ] Shortcode/block support
-- [ ] Test shared engine integration
+* [ ] Design WordPress integration
+* [ ] Implement WordPress plugin
+* [ ] Native campaign configuration
+* [ ] Shortcode/block support
+* [ ] Test shared engine integration
 
 ### 15.2 Laravel
 
-- [ ] Design Laravel integration
-- [ ] Implement Laravel package
-- [ ] Laravel-specific integration layer
-- [ ] Test shared engine integration
+* [ ] Design Laravel integration
+* [ ] Implement Laravel package
+* [ ] Laravel-specific integration layer
+* [ ] Test shared engine integration
 
 ### 15.3 Generic PHP / JavaScript
 
-- [ ] Define generic PHP integration
-- [ ] Define JavaScript integration
-- [ ] Create lightweight integration API
-- [ ] Document embedding process
+* [ ] Define generic PHP integration
+* [ ] Define JavaScript integration
+* [ ] Create lightweight integration API
+* [ ] Document embedding process
 
 ---
 
 ## 16. Long-Term Product
 
-- [ ] Additional unlock methods
-- [ ] Additional presentation types
-- [ ] Additional reward types
-- [ ] Download Gate
-- [ ] Rewarded Video
-- [ ] Offerwall integration
-- [ ] Survey integration
-- [ ] External Task integrations
-- [ ] Hosted SaaS
-- [ ] Multi-tenancy
-- [ ] Billing
-- [ ] Subscriptions
-- [ ] Advanced analytics
-- [ ] Predictive analytics
-- [ ] Automatic campaign optimization
-- [ ] Revenue optimization engine
+* [ ] Additional unlock methods
+* [ ] Additional presentation types
+* [ ] Additional reward types
+* [ ] Download Gate
+* [ ] Rewarded Video
+* [ ] Offerwall integration
+* [ ] Survey integration
+* [ ] External Task integrations
+* [ ] Hosted SaaS
+* [ ] Multi-tenancy
+* [ ] Billing
+* [ ] Subscriptions
+* [ ] Advanced analytics
+* [ ] Predictive analytics
+* [ ] Automatic campaign optimization
+* [ ] Revenue optimization engine
 
 ---
 
@@ -668,42 +770,58 @@ Licensing should not be implemented until the commercial model has been validate
 
 Before commercial release:
 
-- [ ] All MVP functionality complete
-- [ ] Security review complete
-- [x] Automated tests passing
-- [ ] PHPStan passing
-- [ ] PHP-CS-Fixer passing
-- [ ] Supported PHP versions tested
-- [ ] Clean installation tested
-- [ ] Upgrade/migration tested
-- [x] Apache deployment tested
-- [ ] Nginx deployment tested
-- [x] Shared-hosting deployment tested
-- [ ] Mobile testing complete
-- [ ] Documentation complete
-- [ ] Production configuration reviewed
-- [ ] Secrets excluded from distribution
-- [ ] Development dependencies excluded from production package
-- [ ] Release archive tested on a clean server
+* [ ] All MVP functionality complete
+* [ ] Security review complete
+* [x] Automated tests passing
+* [ ] PHPStan passing
+* [ ] PHP-CS-Fixer passing
+* [ ] Supported PHP versions tested
+* [ ] Clean installation tested
+* [ ] Upgrade/migration tested
+* [x] Apache deployment tested
+* [ ] Nginx deployment tested
+* [x] Shared-hosting deployment tested
+* [x] Mobile testing complete
+* [ ] Documentation complete
+* [ ] Production configuration reviewed
+* [ ] Secrets excluded from distribution
+* [ ] Development dependencies excluded from production package
+* [ ] Release archive tested on a clean server
 
 ---
 
 ## 18. Current Priority
 
-The original priority list is now outdated because several of its early items are already implemented.
+The earlier priority list is now outdated because the core Campaign Management and Popup Gate functionality is substantially implemented, and the product architecture/docs for the Content Gate are now settled.
 
 ### Current order
 
-1. **Complete Popup Gate UX and real visitor workflow**
-2. **Complete Campaign Management CRUD**
-3. **Implement Content / Read-more Gate**
+1. **Complete Content / Read-more Gate**
+   
+   Build the agreed client-side split-point implementation, shared unlock protocol usage, CSS lock, inline gate UI, and local demo.
+
+2. **Complete Popup Gate UX**
+   
+   * final wording
+   * completion state
+   * dedicated expired state
+   * final visual polish
+
+3. **Complete local end-to-end MVP visitor workflow**
+   
+   This becomes complete once both Popup Gate and Content Gate have been exercised as a coherent local visitor flow.
+
 4. **Complete production security and anti-abuse review**
-5. **Verify complete visitor workflow locally**
-6. **Verify complete visitor workflow remotely**
-7. **Test mobile behavior**
-8. **PHPStan / PHP-CS-Fixer finalization**
-9. **Nginx local deployment**
-10. **Final documentation and packaging**
+
+5. **Verify complete visitor workflow remotely**
+
+6. **PHPStan / PHP-CS-Fixer finalization**
+
+7. **Nginx local deployment**
+
+8. **Final documentation / release documentation**
+
+9. **Commercial packaging**
 
 Do not start advanced analytics, optimization, integrations, licensing, or SaaS work until the MVP visitor workflow is stable.
 

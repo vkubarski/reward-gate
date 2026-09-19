@@ -85,4 +85,24 @@ final class UnlockCompletionRepository implements UnlockCompletionRepositoryInte
 
         return (int) $statement->fetchColumn();
     }
+
+    public function hasCompletionByCampaignAndVisitor(
+        int $campaignId,
+        string $visitorId,
+    ): bool {
+        $statement = $this->pdo->prepare(
+            'SELECT 1
+                         FROM unlock_completions
+                         WHERE campaign_id = :campaign_id
+                           AND visitor_id = :visitor_id
+                         LIMIT 1'
+        );
+
+        $statement->execute([
+                'campaign_id' => $campaignId,
+                'visitor_id' => $visitorId,
+        ]);
+
+        return $statement->fetchColumn() !== false;
+    }
 }

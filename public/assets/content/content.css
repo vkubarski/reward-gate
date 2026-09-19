@@ -1,0 +1,48 @@
+.reward-gate-content {
+    margin: 30px 0;
+    padding: 20px;
+
+    text-align: center;
+}
+
+.reward-gate-content__button {
+    display: inline-block;
+
+    padding: 10px 20px;
+
+    border: 0;
+    border-radius: 6px;
+
+    background: #2563eb;
+    color: #ffffff;
+
+    font: inherit;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.reward-gate-content__button:hover {
+    background: #1d4ed8;
+}
+
+.reward-gate-content__error {
+    margin-top: 10px;
+
+    color: #b91c1c;
+}
+
+[data-reward-gate]:not([data-rg-unlocked]) ~ * {
+    display: none !important;
+}
+
+.reward-gate-content__button:focus-visible {
+    outline: 3px solid #93c5fd;
+    outline-offset: 3px;
+}
+
+.reward-gate-content__button[aria-disabled="true"] {
+    opacity: 0.7;
+
+    cursor: wait;
+}

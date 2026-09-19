@@ -66,7 +66,8 @@ final class UnlockSessionServiceIntegrationTest extends UnlockSessionServiceInte
         sleep(1);
 
         $this->service->complete(
-            $started['token']
+            $started['token'],
+            'visitor-123'
         );
 
         $session = $this->pdo->prepare(
@@ -158,7 +159,8 @@ final class UnlockSessionServiceIntegrationTest extends UnlockSessionServiceInte
 
         try {
             $this->service->complete(
-                $started['token']
+                $started['token'],
+                'visitor-123'
             );
         } finally {
             $session = $this->pdo->prepare(
@@ -261,7 +263,8 @@ final class UnlockSessionServiceIntegrationTest extends UnlockSessionServiceInte
         sleep(1);
 
         $this->service->complete(
-            $started['token']
+            $started['token'],
+            'visitor-123'
         );
 
         $session = $this->unlockSessionRepository->findByTokenHash(
@@ -283,6 +286,194 @@ final class UnlockSessionServiceIntegrationTest extends UnlockSessionServiceInte
         $this->assertSame(
             'visitor-123',
             $completion['visitor_id']
+        );
+    }
+
+    public function testCompleteRejectsWhenCampaignIsPaused(): void
+    {
+        $campaignId = $this->campaignRepository->create(
+            'Paused Campaign',
+            'popup',
+            null,
+            'active',
+            'timer',
+            1,
+        );
+
+        $started = $this->service->start(
+            $campaignId,
+            'visitor-123'
+        );
+
+        $statement = $this->pdo->prepare(
+            'UPDATE unlock_sessions
+             SET started_at = :started_at
+             WHERE id = :id'
+        );
+
+        $statement->execute([
+            'started_at' => date(
+                'Y-m-d H:i:s',
+                time() - 2
+            ),
+            'id' => $started['id'],
+        ]);
+
+        $statement = $this->pdo->prepare(
+            'UPDATE campaigns
+             SET status = :status
+             WHERE id = :id'
+        );
+
+        $statement->execute([
+            'status' => 'paused',
+            'id' => $campaignId,
+        ]);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage(
+            'Campaign is not active.'
+        );
+
+        try {
+            $this->service->complete(
+                $started['token'],
+                'visitor-123'
+            );
+        } finally {
+            $session = $this->unlockSessionRepository
+                ->findByTokenHash(
+                    hash('sha256', $started['token'])
+                );
+
+            $this->assertNotNull($session);
+            $this->assertSame(
+                'active',
+                $session['status']
+            );
+
+            $completion = $this->unlockCompletionRepository
+                ->findByUnlockSessionId(
+                    $started['id']
+                );
+
+            $this->assertNull($completion);
+        }
+    }
+
+    public function testCompleteRejectsWhenCampaignIsArchived(): void
+    {
+        $campaignId = $this->campaignRepository->create(
+            'Archived Campaign',
+            'popup',
+            null,
+            'active',
+            'timer',
+            1,
+        );
+
+        $started = $this->service->start(
+            $campaignId,
+            'visitor-123'
+        );
+
+        $statement = $this->pdo->prepare(
+            'UPDATE unlock_sessions
+             SET started_at = :started_at
+             WHERE id = :id'
+        );
+
+        $statement->execute([
+            'started_at' => date(
+                'Y-m-d H:i:s',
+                time() - 2
+            ),
+            'id' => $started['id'],
+        ]);
+
+        $statement = $this->pdo->prepare(
+            'UPDATE campaigns
+             SET status = :status
+             WHERE id = :id'
+        );
+
+        $statement->execute([
+            'status' => 'archived',
+            'id' => $campaignId,
+        ]);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage(
+            'Campaign is not active.'
+        );
+
+        try {
+            $this->service->complete(
+                $started['token'],
+                'visitor-123'
+            );
+        } finally {
+            $session = $this->unlockSessionRepository
+                ->findByTokenHash(
+                    hash('sha256', $started['token'])
+                );
+
+            $this->assertNotNull($session);
+            $this->assertSame(
+                'active',
+                $session['status']
+            );
+
+            $completion = $this->unlockCompletionRepository
+                ->findByUnlockSessionId(
+                    $started['id']
+                );
+
+            $this->assertNull($completion);
+        }
+    }
+
+    public function testStatusRemainsUnlockedAfterCampaignIsPaused(): void
+    {
+        $campaignId = $this->campaignRepository->create(
+            'Paused After Completion Campaign',
+            'popup',
+            null,
+            'active',
+            'timer',
+            1,
+            'content',
+            3600,
+        );
+
+        $started = $this->service->start(
+            $campaignId,
+            'visitor-123'
+        );
+
+        sleep(1);
+
+        $this->service->complete(
+            $started['token'],
+            'visitor-123'
+        );
+
+        $statement = $this->pdo->prepare(
+            'UPDATE campaigns
+             SET status = :status
+             WHERE id = :id'
+        );
+
+        $statement->execute([
+            'status' => 'paused',
+            'id' => $campaignId,
+        ]);
+
+        $this->assertTrue(
+            $this->service->status(
+                $campaignId,
+                'visitor-123'
+            )
         );
     }
 }
