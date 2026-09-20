@@ -89,7 +89,7 @@
             </form>
         <?php endif; ?>
 
-        <?php if ($campaign['status'] === 'paused'): ?>
+        <?php if ($campaign['status'] !== 'archived'): ?>
             <form
                 method="post"
                 action="/admin/campaigns/<?= (int)$campaign['id'] ?>/archive"

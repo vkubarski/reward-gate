@@ -781,4 +781,53 @@ final class CampaignControllerTest extends TestCase
             $output
         );
     }
+
+    public function testArchiveRejectsAlreadyArchivedCampaign(): void
+    {
+        $campaignService = $this->createMock(
+            CampaignServiceInterface::class
+        );
+
+        $campaignService
+            ->expects($this->once())
+            ->method('findById')
+            ->with(42)
+            ->willReturn([
+                'id' => 42,
+                'status' => 'archived',
+            ]);
+
+        $campaignService
+            ->expects($this->never())
+            ->method('update');
+
+        $csrfToken = $this->createMock(
+            CsrfTokenInterface::class
+        );
+
+        $csrfToken
+            ->expects($this->once())
+            ->method('validate')
+            ->with('valid-csrf-token')
+            ->willReturn(true);
+
+        $_POST = [
+            'csrf_token' => 'valid-csrf-token',
+        ];
+
+        $controller = $this->createController(
+            $campaignService,
+            $csrfToken
+        );
+
+        $response = $this->captureResponse(
+            fn () => $controller->archive(['id' => '42'])
+        );
+
+        $this->assertSame(400, $response['status']);
+        $this->assertSame(
+            'Campaign is already archived.',
+            $response['body']
+        );
+    }
 }

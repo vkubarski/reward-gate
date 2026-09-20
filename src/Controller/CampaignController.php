@@ -431,9 +431,9 @@ final class CampaignController
                 return;
             }
 
-            if ($campaign['status'] !== 'paused') {
+            if ($campaign['status'] === 'archived') {
                 http_response_code(400);
-                echo 'Only paused campaigns can be archived.';
+                echo 'Campaign is already archived.';
 
                 return;
             }

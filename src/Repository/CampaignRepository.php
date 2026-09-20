@@ -147,6 +147,7 @@ final class CampaignRepository implements CampaignRepositoryInterface
         $statement = $this->pdo->query(
             "SELECT *
              FROM campaigns
+             WHERE status != 'archived'
              ORDER BY {$orderBy} {$direction}
              LIMIT {$limit} OFFSET {$offset}"
         );

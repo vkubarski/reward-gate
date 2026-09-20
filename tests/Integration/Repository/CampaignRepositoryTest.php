@@ -220,6 +220,36 @@ final class CampaignRepositoryTest extends IntegrationTestCase
         $this->assertContains($secondId, $ids);
     }
 
+    public function testFindAllExcludesArchivedCampaigns(): void
+    {
+        $repository = new CampaignRepository($this->pdo);
+
+        $activeId = $repository->create(
+            'Active Campaign',
+            'popup',
+            null,
+            'active'
+        );
+
+        $archivedId = $repository->create(
+            'Archived Campaign',
+            'popup',
+            null,
+            'archived'
+        );
+
+        $campaigns = $repository->findAll(
+            'id',
+            'ASC',
+            10
+        );
+
+        $ids = array_column($campaigns, 'id');
+
+        $this->assertContains($activeId, $ids);
+        $this->assertNotContains($archivedId, $ids);
+    }
+
     public function testFindAllOrdersByRequestedField(): void
     {
         $repository = new CampaignRepository($this->pdo);
