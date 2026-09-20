@@ -107,6 +107,11 @@ This document tracks implementation progress and the remaining work required to 
 * [x] Test campaign presentation-settings normalization
 * [x] Test campaign frequency-limit handling
 * [x] Test popup-related controller behavior
+* [x] Test Content Gate-related controller behavior
+* [x] Test visitor binding and wrong-visitor rejection
+* [x] Test click unlock completion without timer delay
+* [x] Test frequency-limit transaction rollback behavior
+* [x] Test concurrent completion protection
 
 ---
 
@@ -133,7 +138,7 @@ This document tracks implementation progress and the remaining work required to 
 * [ ] Review and improve input validation as features are added
 * [x] Support trailing-slash routes
 * [x] Unit-test router behavior
-* [x] Add visitor/demo route used for local popup testing
+* [x] Add visitor/demo route used for local gate testing
 
 ### 3.3 Database
 
@@ -141,7 +146,7 @@ This document tracks implementation progress and the remaining work required to 
 * [x] Establish database connection
 * [x] Configure database credentials
 * [x] Use prepared SQL statements
-* [ ] Establish reusable transaction handling where required
+* [x] Use explicit transactions where required by unlock completion
 * [x] Test database connection locally
 * [x] Test database connection on demo server
 
@@ -217,6 +222,7 @@ This document tracks implementation progress and the remaining work required to 
 * [x] Define campaign lifecycle rules
 * [x] Implement presentation-settings normalization
 * [x] Implement popup presentation settings
+* [x] Implement Content Gate campaign configuration
 * [x] Implement campaign frequency-limit configuration
 * [x] Preserve unlimited frequency behavior with `NULL`
 * [ ] Decide whether hard-delete is required for MVP
@@ -232,6 +238,7 @@ This document tracks implementation progress and the remaining work required to 
 * [x] Define session expiration
 * [x] Implement session lookup
 * [x] Implement session validation
+* [x] Bind sessions to the visitor when a visitor ID is available
 
 ### 5.3 Unlock Completion
 
@@ -243,6 +250,10 @@ This document tracks implementation progress and the remaining work required to 
 * [x] Record completion timestamp
 * [x] Handle expired sessions
 * [x] Handle invalid sessions
+* [x] Reject completion from the wrong visitor
+* [x] Support anonymous/unbound sessions
+* [x] Protect frequency-limit checks against concurrent completions
+* [x] Lock the campaign row during completion verification
 
 ### 5.4 Timer Unlock
 
@@ -254,7 +265,26 @@ This document tracks implementation progress and the remaining work required to 
 * [x] Reject premature completion
 * [x] Complete unlock after server verification
 
-### 5.5 Reward / Unlock Result
+### 5.5 Click Unlock
+
+* [x] Define click unlock interface/boundary
+* [x] Create click unlock session flow
+* [x] Allow click completion without timer delay
+* [x] Verify click completion server-side
+* [x] Use the same completion/replay/frequency rules as timer unlock
+* [x] Support Content Gate click unlock
+
+### 5.6 Frequency Limit
+
+* [x] Define campaign-specific frequency-limit behavior
+* [x] Enforce frequency limits when starting unlock sessions
+* [x] Enforce frequency limits during completion
+* [x] Preserve `NULL` as unlimited/permanent unlock behavior
+* [x] Define exact cutoff behavior
+* [x] Verify completions exactly at the cutoff are no longer considered recent
+* [x] Protect concurrent completions with campaign row locking
+
+### 5.7 Reward / Unlock Result
 
 MVP does not require a separate reward subsystem.
 
@@ -375,48 +405,63 @@ the original DOM is revealed in place.
 
 ### 8.1 Presentation Contract
 
-* [ ] Define the Content Gate split-point HTML contract
-* [ ] Use one empty `<div data-reward-gate data-campaign-id="...">` at the cut point
-* [ ] Define following-sibling visibility behavior
-* [ ] Create Content Gate CSS
-* [ ] Ensure Content Gate CSS loads before protected content can render
-* [ ] Keep protected article HTML in the customer page rather than Reward Gate DB
-* [ ] Create Content Gate JavaScript
-* [ ] Render gate UI inline at the split point
-* [ ] Keep the original customer DOM intact
-* [ ] Set an explicit unlocked state on successful completion
-* [ ] Support one Content Gate per page for MVP
+* [x] Define the Content Gate split-point HTML contract
+* [x] Use one empty `<div data-reward-gate data-campaign-id="...">` at the cut point
+* [x] Define following-sibling visibility behavior
+* [x] Create Content Gate CSS
+* [x] Ensure Content Gate CSS loads before protected content can render
+* [x] Keep protected article HTML in the customer page rather than Reward Gate DB
+* [x] Create Content Gate JavaScript
+* [x] Render gate UI inline at the split point
+* [x] Keep the original customer DOM intact
+* [x] Set an explicit unlocked state on successful completion
+* [x] Support one Content Gate per page for MVP
 
 ### 8.2 Unlock Flow
 
-* [ ] Load and validate the campaign
-* [ ] Verify the campaign is configured for Content Gate presentation
-* [ ] Verify the supported unlock method
-* [ ] Start unlock session using the shared unlock protocol
-* [ ] Display the timer inline
-* [ ] Request completion from the server
-* [ ] Verify completion server-side
-* [ ] Reveal protected content after successful completion
-* [ ] Keep protected content hidden when initialization fails
-* [ ] Display a safe inline error when the gate cannot initialize
-* [ ] Handle invalid/missing campaign configuration without exposing content
-* [ ] Handle incorrect gate placement safely
+* [x] Load and validate the campaign
+* [x] Verify the campaign is configured for Content Gate presentation
+* [x] Verify the supported unlock method
+* [x] Start unlock session using the shared unlock protocol
+* [x] Open the configured destination through the visitor CTA
+* [x] Request click completion from the server
+* [x] Verify completion server-side
+* [x] Reveal protected content after successful completion
+* [x] Keep protected content hidden when initialization fails
+* [x] Display a safe inline error when the gate cannot initialize
+* [x] Handle invalid/missing campaign configuration without exposing content
+* [x] Handle non-JSON/error responses safely
+* [x] Handle unlock-start failures without leaving the gate permanently disabled
+* [x] Remove the gate UI after successful unlock
+* [x] Restore the CTA after unlock failure
+* [x] Use server-side visitor status to preserve unlock state across reloads
+* [x] Enforce campaign frequency-limit behavior
+* [ ] Verify incorrect gate placement safely
+
+> Content Gate uses the **click** unlock method for MVP. It does not display a timer.
 
 ### 8.3 JavaScript / Shared Unlock
 
-* [ ] Inspect the existing Popup unlock flow and identify the genuinely shared protocol
-* [ ] Extract a small shared client-side unlock helper where duplication is real
-* [ ] Keep presentation-specific UI logic outside the shared unlock helper
-* [ ] Ensure Content Gate and Popup Gate use the same server verification rules
-* [ ] Avoid creating a generic frontend framework or speculative abstraction
+* [x] Inspect the existing Popup unlock flow and identify the genuinely shared protocol
+* [ ] Extract a shared client-side unlock helper
+* [x] Keep presentation-specific UI logic outside the shared unlock flow
+* [x] Ensure Content Gate and Popup Gate use the same server verification rules
+* [x] Avoid creating a generic frontend framework or speculative abstraction
+
+The current implementation intentionally does not introduce a generic frontend
+unlock helper. The shared protocol is provided by the existing unlock API and
+server-side service.
 
 ### 8.4 Configuration
 
 * [x] Define that Content Gate configuration belongs to the campaign
 * [x] Define that `presentation_settings` does not store customer article HTML
-* [ ] Define any remaining Content Gate presentation settings required for MVP
-* [ ] Ensure no percentage-based or selector-based article splitting is required for MVP
-* [ ] Ensure Content Gate uses the shared unlock protocol
+* [x] Define required Content Gate presentation settings for MVP
+* [x] Ensure no percentage-based or selector-based article splitting is required for MVP
+* [x] Ensure Content Gate uses the shared unlock protocol
+* [x] Define destination URL as Content Gate campaign configuration
+* [x] Define CTA label as Content Gate campaign configuration
+* [x] Define one Content Gate per page as an MVP limitation
 
 ### 8.5 Browser / Compatibility Tests
 
@@ -425,7 +470,7 @@ the original DOM is revealed in place.
 * [ ] Verify successful unlock reveals the original DOM without rebuilding it
 * [ ] Verify desktop behavior
 * [ ] Verify mobile behavior
-* [ ] Verify timer manipulation cannot directly grant unlock
+* [ ] Verify click completion cannot directly grant unlock without server verification
 * [ ] Verify replay/frequency rules match Popup Gate behavior
 
 ---
@@ -435,9 +480,10 @@ the original DOM is revealed in place.
 ### 9.1 Server Authority
 
 * [x] Server determines session validity
-* [x] Server determines minimum completion time
+* [x] Server determines minimum completion time for timer unlocks
 * [x] Server determines completion eligibility
 * [x] Client-side state cannot directly grant unlock
+* [x] Click unlock completion is verified server-side
 
 ### 9.2 Session Security
 
@@ -447,6 +493,8 @@ the original DOM is revealed in place.
 * [x] Implement session expiration
 * [x] Implement one-time completion
 * [x] Prevent replay
+* [x] Bind completion to the visitor where applicable
+* [x] Reject completion from a different visitor
 
 ### 9.3 Request Security
 
@@ -456,6 +504,8 @@ the original DOM is revealed in place.
 * [x] Use prepared SQL statements
 * [x] Escape output appropriately
 * [x] Protect internal application files from direct HTTP access
+* [x] Handle malformed JSON requests safely
+* [x] Handle non-JSON backend errors safely in visitor-facing Content Gate JavaScript
 
 ### 9.4 Anti-Abuse
 
@@ -463,9 +513,16 @@ the original DOM is revealed in place.
 * [x] Define applicable campaign limits
 * [x] Prevent repeated completion
 * [x] Handle expired sessions
+* [x] Implement first-party visitor identification
+* [x] Use a cryptographically random visitor ID
+* [x] Store visitor ID in a first-party cookie
+* [x] Avoid IP address as visitor identity
+* [x] Avoid browser fingerprinting
+* [x] Define cookie-clearing/incognito limitations
+* [x] Define campaign-specific frequency-limit behavior
+* [x] Protect concurrent completion/frequency-limit checks with a campaign row lock
 * [ ] Record verification failures where useful
-* [ ] Review visitor identification strategy for privacy and production use
-* [ ] Define visitor identification and frequency-limiting strategy for production, including privacy, proxy/IP handling, rotation, and abuse resistance
+* [ ] Perform production privacy/configuration review of visitor identification
 
 ### 9.5 Security Review
 
@@ -477,7 +534,21 @@ the original DOM is revealed in place.
 * [x] Review public/private directory handling
 * [ ] Review production configuration
 * [ ] Review trusted executable popup content security implications
-* [ ] Review Content Gate client-side visibility limitations and document the security boundary clearly
+* [x] Define Content Gate client-side visibility as a presentation/UX boundary rather than a strong security boundary
+* [ ] Document the Content Gate security boundary clearly
+
+The following are intentionally **not MVP requirements**:
+
+* IP-based visitor identity
+* Browser fingerprinting
+* JWT-based unlock tokens
+* CAPTCHA
+* Redis/distributed anti-abuse infrastructure
+* ML/fraud scoring
+* Elaborate anti-bot systems
+
+Basic endpoint rate limiting may be added later if real-world usage demonstrates
+that it is necessary.
 
 ---
 
@@ -533,15 +604,21 @@ the original DOM is revealed in place.
 * [x] Test campaign repository
 * [x] Test campaign logic
 * [x] Test timer logic
+* [x] Test click unlock logic
 * [x] Test unlock-session creation
 * [x] Test session validation
 * [x] Test completion validation
 * [x] Test replay prevention
+* [x] Test visitor binding
+* [x] Test wrong-visitor rejection
 * [x] Test authentication
 * [x] Test security components
 * [x] Test controllers
 * [x] Test presentation-settings normalization
 * [x] Test frequency-limit input handling
+* [x] Test frequency-limit cutoff behavior
+* [x] Test frequency-limit transaction rollback
+* [x] Test concurrent completion protection
 
 Current automated test suite:
 
@@ -554,7 +631,7 @@ Current automated test suite:
 
 Current verified baseline:
 
-> **106 tests, 506 assertions**
+> **171 tests, 773 assertions**
 
 ### 11.2 Integration Tests
 
@@ -564,15 +641,19 @@ Current verified baseline:
 * [x] Test authentication repository
 * [x] Test campaign management repository
 * [x] Test complete timer unlock service flow
+* [x] Test click unlock completion
+* [x] Test visitor-bound completion
+* [x] Test frequency-limit enforcement during completion
+* [x] Test campaign-row locking during completion
 
 ### 11.3 End-to-End Tests
 
-* [x] Visitor encounters gate locally
-* [x] Visitor starts unlock locally
-* [x] Timer completes locally
-* [x] Server verifies completion locally
+* [x] Visitor encounters Popup Gate locally
+* [x] Visitor starts Popup unlock locally
+* [x] Popup timer completes locally
+* [x] Server verifies Popup completion locally
 * [x] Protected content unlocks locally
-* [x] Replay attempt fails
+* [x] Popup replay attempt fails
 * [x] Expired/invalid session paths are implemented
 * [x] Manipulated client timer cannot directly grant unlock
 * [x] Multiple completion attempts fail
@@ -582,6 +663,7 @@ Current verified baseline:
 * [x] Popup iframe content tested
 * [x] Popup embedded JavaScript tested
 * [x] Popup error handling tested
+* [ ] Complete Content Gate browser/E2E happy path
 * [ ] Formal repeatable browser/E2E test procedure
 * [ ] Verify complete workflow remotely
 
@@ -599,7 +681,7 @@ Current verified baseline:
 * [x] Verify Popup Gate visitor workflow locally
 * [x] Verify Popup Gate on desktop
 * [x] Verify Popup Gate on phone
-* [ ] Create dedicated Content Gate demo page
+* [x] Create dedicated Content Gate demo page
 * [ ] Verify Content Gate with JavaScript disabled
 * [ ] Verify Content Gate visitor workflow locally
 * [ ] Verify Content Gate on desktop
@@ -792,28 +874,45 @@ Before commercial release:
 
 ## 18. Current Priority
 
-The earlier priority list is now outdated because the core Campaign Management and Popup Gate functionality is substantially implemented, and the product architecture/docs for the Content Gate are now settled.
+The core backend, Campaign Management, Popup Gate, unlock engine, visitor identification,
+frequency limiting, and Content Gate implementation are substantially complete.
+
+The remaining work is now primarily **verification, UX polish, production review, and deployment**.
 
 ### Current order
 
-1. **Complete Content / Read-more Gate**
-   
-   Build the agreed client-side split-point implementation, shared unlock protocol usage, CSS lock, inline gate UI, and local demo.
+1. **Complete Content Gate local browser/E2E verification**
+
+   Verify the actual visitor flow:
+
+   * initial locked state
+   * protected content visibility
+   * CTA click
+   * destination opening
+   * server-side completion
+   * content reveal
+   * reload/persistent unlock behavior
+   * frequency-limit behavior
+   * failure states
 
 2. **Complete Popup Gate UX**
-   
+
    * final wording
    * completion state
    * dedicated expired state
    * final visual polish
 
 3. **Complete local end-to-end MVP visitor workflow**
-   
-   This becomes complete once both Popup Gate and Content Gate have been exercised as a coherent local visitor flow.
+
+   Exercise both Popup Gate and Content Gate as a coherent local visitor workflow.
 
 4. **Complete production security and anti-abuse review**
 
+   Focus on actual production risks rather than adding speculative anti-abuse infrastructure.
+
 5. **Verify complete visitor workflow remotely**
+
+   Test the real deployment environment on the demo server.
 
 6. **PHPStan / PHP-CS-Fixer finalization**
 
@@ -823,7 +922,8 @@ The earlier priority list is now outdated because the core Campaign Management a
 
 9. **Commercial packaging**
 
-Do not start advanced analytics, optimization, integrations, licensing, or SaaS work until the MVP visitor workflow is stable.
+Do not start advanced analytics, optimization, integrations, licensing, or SaaS work
+until the MVP visitor workflow is stable.
 
 ---
 
@@ -839,3 +939,4 @@ At every stage, prioritize work that:
 Avoid implementing infrastructure solely because it may become useful someday.
 
 Reward Gate should evolve from a working product into a larger platform based on evidence rather than speculation.
+
