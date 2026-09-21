@@ -162,12 +162,11 @@ declare(strict_types=1);
             || ($old['unlock_method'] ?? 'timer') !== 'click'
         ) ? 'hidden' : '' ?>
     >
-        <hr class="my-4">
-
-        <h2 class="h5 mb-3">
-            Content Gate Settings
-        </h2>
-
+        <div class="admin-form-section">
+            <h2 class="h5 mb-3">
+                Content Gate Settings
+            </h2>
+        </div>
         <div class="mb-3">
             <label
                 for="content_cta_label"
@@ -238,20 +237,19 @@ declare(strict_types=1);
         >
 
         <div class="form-text">
-            Minimum time a visitor must wait before they can start
-            this campaign again. Leave empty to allow unlimited
-            unlock attempts.
+            How long a successful unlock remains valid for this campaign.
+            Leave empty to keep the visitor unlocked permanently.
         </div>
     </div>
 
     <div data-presentation-settings="popup"
          <?= $old['presentation_type'] !== 'popup' ? 'hidden' : '' ?>
     >
-        <hr class="my-4">
-
-        <h2 class="h5 mb-3">
-            Popup Settings
-        </h2>
+        <div class="admin-form-section">
+            <h2 class="h5 mb-3">
+                Popup Settings
+            </h2>
+        </div>
 
         <div class="mb-3">
             <label
@@ -347,7 +345,7 @@ declare(strict_types=1);
         </div>
     </div>
 
-    <div class="d-flex gap-2">
+    <div class="admin-form-actions d-flex flex-wrap gap-2">
         <button
             type="submit"
             class="btn btn-primary"
@@ -365,7 +363,7 @@ declare(strict_types=1);
                 ENT_QUOTES,
                 'UTF-8'
             ) ?>"
-            class="btn btn-outline-secondary"
+            class="admin-form-cancel btn"
         >
             Cancel
         </a>

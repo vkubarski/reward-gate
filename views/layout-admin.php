@@ -84,13 +84,13 @@ declare(strict_types=1);
                     <div class="admin-nav-section-title">
                         Campaigns
                     </div>
-
                     <a
                         href="/admin/campaigns"
-                        class="admin-nav-link"
+                        class="admin-nav-link admin-nav-link-active"
                     >
                         <span>Campaigns</span>
                     </a>
+                    <a
                 </div>
             </nav>
 
@@ -146,7 +146,7 @@ declare(strict_types=1);
                     <div class="dropdown">
                         <button
                             type="button"
-                            class="btn btn-outline-secondary dropdown-toggle"
+                            class="admin-appearance-button btn btn-outline-secondary dropdown-toggle"
                             data-bs-toggle="dropdown"
                             aria-expanded="false"
                             id="appearanceMenu"

@@ -138,7 +138,9 @@ This document tracks implementation progress and the remaining work required to 
 * [ ] Review and improve input validation as features are added
 * [x] Support trailing-slash routes
 * [x] Unit-test router behavior
-* [x] Add visitor/demo route used for local gate testing
+* [x] Add visitor/demo routes used for local gate testing
+* [x] Add dedicated Popup Gate demo route
+* [x] Add dedicated Content Gate demo route
 
 ### 3.3 Database
 
@@ -155,7 +157,7 @@ This document tracks implementation progress and the remaining work required to 
 * [x] Establish Controller → View architecture
 * [x] Establish shared `layout.php`
 * [x] Move document structure into layout
-* [x] Remove duplicated `<html>`, `<head>` and `<body>` structures from views
+* [x] Remove duplicated `<html>`, `<head>` and `<body>` structures from application views
 * [x] Establish campaign views
 * [x] Establish shared rendering approach
 * [x] Establish dedicated admin layout
@@ -324,6 +326,8 @@ The MVP reward is simply:
 * [x] Configure popup message
 * [x] Configure popup message visibility
 * [x] Configure popup content/ad code
+* [x] Configure Content Gate CTA label
+* [x] Configure Content Gate destination URL
 * [x] Configure frequency limit
 * [x] Allow unlimited frequency by leaving frequency limit empty
 
@@ -442,14 +446,12 @@ the original DOM is revealed in place.
 
 ### 8.3 JavaScript / Shared Unlock
 
-* [x] Inspect the existing Popup unlock flow and identify the genuinely shared protocol
-* [ ] Extract a shared client-side unlock helper
 * [x] Keep presentation-specific UI logic outside the shared unlock flow
 * [x] Ensure Content Gate and Popup Gate use the same server verification rules
 * [x] Avoid creating a generic frontend framework or speculative abstraction
 
-The current implementation intentionally does not introduce a generic frontend
-unlock helper. The shared protocol is provided by the existing unlock API and
+The current implementation intentionally keeps the presentation-specific JavaScript
+separate. The shared unlock protocol is provided by the existing unlock API and
 server-side service.
 
 ### 8.4 Configuration
@@ -465,13 +467,13 @@ server-side service.
 
 ### 8.5 Browser / Compatibility Tests
 
-* [ ] Verify protected content stays hidden with JavaScript disabled
-* [ ] Verify protected content stays hidden while the gate is initializing
-* [ ] Verify successful unlock reveals the original DOM without rebuilding it
-* [ ] Verify desktop behavior
-* [ ] Verify mobile behavior
-* [ ] Verify click completion cannot directly grant unlock without server verification
-* [ ] Verify replay/frequency rules match Popup Gate behavior
+* [x] Verify protected content stays hidden with JavaScript disabled
+* [x] Verify protected content stays hidden while the gate is initializing
+* [x] Verify successful unlock reveals the original DOM without rebuilding it
+* [x] Verify desktop behavior
+* [x] Verify mobile behavior
+* [x] Verify click completion cannot directly grant unlock without server verification
+* [x] Verify replay/frequency rules match Popup Gate behavior
 
 ---
 
@@ -563,7 +565,7 @@ that it is necessary.
 * [x] Create protection rules for sensitive files
 * [x] Create directory protection rules
 * [x] Test campaign routes locally
-* [x] Test visitor/demo route locally
+* [x] Test visitor/demo routes locally
 * [x] Test local visitor access from a mobile device
 
 ### 10.2 Shared Hosting
@@ -631,7 +633,7 @@ Current automated test suite:
 
 Current verified baseline:
 
-> **171 tests, 773 assertions**
+> **173 tests, 782 assertions**
 
 ### 11.2 Integration Tests
 
@@ -663,7 +665,7 @@ Current verified baseline:
 * [x] Popup iframe content tested
 * [x] Popup embedded JavaScript tested
 * [x] Popup error handling tested
-* [ ] Complete Content Gate browser/E2E happy path
+* [x] Complete Content Gate browser/E2E happy path
 * [ ] Formal repeatable browser/E2E test procedure
 * [ ] Verify complete workflow remotely
 
@@ -675,18 +677,21 @@ Current verified baseline:
 
 * [x] Create local database
 * [x] Create development/test data
-* [x] Create demo campaign
+* [x] Create demo campaigns
 * [x] Create demo protected content
-* [x] Create local demo route
+* [x] Create dedicated Popup Gate demo route
+* [x] Create dedicated Content Gate demo route
 * [x] Verify Popup Gate visitor workflow locally
 * [x] Verify Popup Gate on desktop
 * [x] Verify Popup Gate on phone
-* [x] Create dedicated Content Gate demo page
-* [ ] Verify Content Gate with JavaScript disabled
-* [ ] Verify Content Gate visitor workflow locally
-* [ ] Verify Content Gate on desktop
-* [ ] Verify Content Gate on phone
-* [ ] Finalize demo data/setup procedure
+* [x] Verify Content Gate with JavaScript disabled
+* [x] Verify Content Gate visitor workflow locally
+* [x] Verify Content Gate on desktop
+* [x] Verify Content Gate on phone
+* [x] Verify demo seed creates required demo data
+* [x] Verify demo seed is idempotent
+* [x] Document reproducible demo setup in `README.md`
+* [x] Finalize demo data/setup procedure
 
 ### 12.2 Remote
 
@@ -875,44 +880,50 @@ Before commercial release:
 ## 18. Current Priority
 
 The core backend, Campaign Management, Popup Gate, unlock engine, visitor identification,
-frequency limiting, and Content Gate implementation are substantially complete.
+frequency limiting, Content Gate, and reproducible demo setup are substantially complete.
 
-The remaining work is now primarily **verification, UX polish, production review, and deployment**.
+The remaining MVP work is now primarily **admin UI polish, production verification,
+security review, and deployment validation**.
 
 ### Current order
 
-1. **Complete Content Gate local browser/E2E verification**
+1. **Admin panel final visual theme**
 
-   Verify the actual visitor flow:
+   * Refine the final visual theme
+   * Establish consistent visual hierarchy and spacing
+   * Polish forms, buttons, navigation, and campaign pages
+   * Ensure desktop and mobile presentation are coherent
 
-   * initial locked state
-   * protected content visibility
-   * CTA click
-   * destination opening
-   * server-side completion
-   * content reveal
-   * reload/persistent unlock behavior
-   * frequency-limit behavior
-   * failure states
+2. **Reward Gate branding**
 
-2. **Complete Popup Gate UX**
+   * Add final Reward Gate logo
+   * Add favicon
+   * Integrate final branding into the admin UI
 
-   * final wording
-   * completion state
-   * dedicated expired state
-   * final visual polish
+3. **Complete Popup Gate UX**
 
-3. **Complete local end-to-end MVP visitor workflow**
-
-   Exercise both Popup Gate and Content Gate as a coherent local visitor workflow.
+   * Final wording
+   * Completion state
+   * Dedicated expired state
+   * Final visual polish
 
 4. **Complete production security and anti-abuse review**
 
-   Focus on actual production risks rather than adding speculative anti-abuse infrastructure.
+   * Review actual production risks
+   * Review trusted executable popup content
+   * Review visitor identification/privacy behavior
+   * Review production configuration
 
 5. **Verify complete visitor workflow remotely**
 
-   Test the real deployment environment on the demo server.
+   * Popup Gate
+   * Content Gate
+   * Expired sessions
+   * Replay attempts
+   * Frequency limits
+   * Manipulated timer
+   * Multiple completion attempts
+   * Mobile devices
 
 6. **PHPStan / PHP-CS-Fixer finalization**
 
@@ -922,8 +933,11 @@ The remaining work is now primarily **verification, UX polish, production review
 
 9. **Commercial packaging**
 
-Do not start advanced analytics, optimization, integrations, licensing, or SaaS work
-until the MVP visitor workflow is stable.
+After the MVP visitor workflow and presentation are stable, begin work on the
+commercial “killer features” based on the product's validated use cases.
+
+Do not start advanced analytics, optimization, integrations, licensing, or SaaS
+infrastructure before the MVP is stable.
 
 ---
 

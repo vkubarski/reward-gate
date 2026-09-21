@@ -50,7 +50,15 @@
                             colspan="4"
                             class="text-center text-body-secondary py-5"
                         >
-                            No campaigns yet.
+                            <div class="text-center py-5">
+                                <div class="fw-semibold mb-1">
+                                    No campaigns yet.
+                                </div>
+
+                                <div class="text-body-secondary small">
+                                    Create your first campaign to get started.
+                                </div>
+                            </div>
                         </td>
                     </tr>
                 <?php endif; ?>
@@ -58,10 +66,11 @@
                 <?php foreach ($campaigns as $campaign): ?>
                     <?php
                     $statusClass = match ($campaign['status']) {
-                        'active' => 'text-bg-success',
-                        'paused' => 'text-bg-warning',
-                        'archived' => 'text-bg-dark',
-                        default => 'text-bg-secondary',
+                        'active' => 'admin-status-badge--active',
+                        'paused' => 'admin-status-badge--paused',
+                        'draft' => 'admin-status-badge--draft',
+                        'archived' => 'admin-status-badge--archived',
+                        default => 'admin-status-badge--draft',
                     };
                     ?>
 
@@ -69,7 +78,7 @@
                         <td>
                             <a
                                 href="/admin/campaigns/<?= (int)$campaign['id'] ?>"
-                                class="text-decoration-none fw-semibold"
+                                class="admin-campaign-link"
                             >
                                 <?= htmlspecialchars(
                                     $campaign['name'],
@@ -89,7 +98,7 @@
 
                         <td>
                             <span
-                                class="badge <?= $statusClass ?>"
+                                class="badge admin-status-badge <?= $statusClass ?>"
                             >
                                 <?= htmlspecialchars(
                                     ucfirst($campaign['status']),
@@ -102,7 +111,7 @@
                         <td class="text-end">
                             <a
                                 href="/admin/campaigns/<?= (int)$campaign['id'] ?>"
-                                class="btn btn-sm btn-outline-secondary"
+                                class="admin-view-button btn btn-sm btn-outline-secondary"
                             >
                                 View
                             </a>

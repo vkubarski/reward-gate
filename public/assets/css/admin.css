@@ -1,28 +1,91 @@
 :root {
     --rg-sidebar-width: 240px;
+
+    --rg-primary: #2563eb;
+    --rg-primary-hover: #1d4ed8;
+
+    --rg-primary-button: #2563eb;
+    --rg-primary-button-hover: #1d4ed8;
+
+    --rg-page-bg: #f8fafc;
+    --rg-sidebar-bg: #ffffff;
+    --rg-card-bg: #ffffff;
+    --rg-border: #e2e8f0;
 }
+
+[data-bs-theme="dark"] {
+    --rg-primary: #60a5fa;
+    --rg-primary-hover: #93c5fd;
+
+    --rg-primary-button: #2563eb;
+    --rg-primary-button-hover: #1d4ed8;
+
+    --rg-page-bg: #0f172a;
+    --rg-sidebar-bg: #111827;
+    --rg-card-bg: #1e293b;
+    --rg-border: #334155;
+}
+
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
 
 body {
     min-width: 320px;
+    background-color: var(--rg-page-bg);
 }
+
+
+/* ==========================================================================
+   Layout
+   ========================================================================== */
 
 .admin-sidebar {
     width: var(--rg-sidebar-width);
-    background-color: var(--bs-tertiary-bg);
-    border-right: 1px solid var(--bs-border-color);
+    background-color: var(--rg-sidebar-bg);
+    border-right: 1px solid var(--rg-border);
 }
 
 .admin-sidebar-header {
     padding: 1.25rem 1rem;
-    border-bottom: 1px solid var(--bs-border-color);
+    border-bottom: 1px solid var(--rg-border);
 }
 
 .admin-sidebar-footer {
-    border-top: 1px solid var(--bs-border-color);
+    border-top: 1px solid var(--rg-border);
 }
 
+.admin-topbar {
+    min-height: 64px;
+    padding: 0.75rem 0;
+    background-color: var(--bs-body-bg);
+}
+
+.admin-page-header {
+    margin-bottom: 1.5rem;
+}
+
+.admin-page-header h1 {
+    margin-bottom: 0;
+}
+
+@media (min-width: 992px) {
+    .admin-sidebar {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        flex: 0 0 var(--rg-sidebar-width);
+    }
+}
+
+
+/* ==========================================================================
+   Navigation
+   ========================================================================== */
+
 .admin-brand {
-    color: var(--bs-body-color);
+    color: var(--rg-primary);
     font-size: 1.15rem;
     font-weight: 700;
 }
@@ -55,38 +118,313 @@ body {
     color: var(--bs-body-color);
 }
 
+.admin-nav-link-active {
+    background-color: var(--rg-primary);
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.admin-nav-link-active:hover {
+    background-color: var(--rg-primary-hover);
+    color: #ffffff;
+}
+
 .admin-nav-button {
     font: inherit;
 }
 
-.admin-topbar {
-    background-color: var(--bs-body-bg);
-    min-height: 64px;
-    padding: 0.75rem 0;
+
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+
+.btn-primary {
+    --bs-btn-color: #ffffff;
+    --bs-btn-bg: var(--rg-primary-button);
+    --bs-btn-border-color: var(--rg-primary-button);
+
+    --bs-btn-hover-color: #ffffff;
+    --bs-btn-hover-bg: var(--rg-primary-button-hover);
+    --bs-btn-hover-border-color: var(--rg-primary-button-hover);
+
+    --bs-btn-active-color: #ffffff;
+    --bs-btn-active-bg: var(--rg-primary-button-hover);
+    --bs-btn-active-border-color: var(--rg-primary-button-hover);
 }
 
-.admin-page-header {
-    margin-bottom: 1.5rem;
+.admin-view-button,
+.admin-appearance-button {
+    --bs-btn-color: var(--bs-secondary-color);
+    --bs-btn-border-color: var(--rg-border);
+
+    --bs-btn-hover-color: var(--bs-body-color);
+    --bs-btn-hover-bg: var(--bs-secondary-bg);
+    --bs-btn-hover-border-color: var(--rg-border);
+
+    --bs-btn-active-color: var(--bs-body-color);
+    --bs-btn-active-bg: var(--bs-secondary-bg);
+    --bs-btn-active-border-color: var(--rg-border);
+
+    font-weight: 600;
 }
 
-.admin-page-header h1 {
+.admin-action-button {
+    font-weight: 600;
+}
+
+.admin-action-button--activate {
+    --bs-btn-color: #ffffff;
+    --bs-btn-bg: #16a34a;
+    --bs-btn-border-color: #16a34a;
+
+    --bs-btn-hover-color: #ffffff;
+    --bs-btn-hover-bg: #15803d;
+    --bs-btn-hover-border-color: #15803d;
+
+    --bs-btn-active-color: #ffffff;
+    --bs-btn-active-bg: #166534;
+    --bs-btn-active-border-color: #166534;
+}
+
+.admin-action-button--pause {
+    --bs-btn-color: #78350f;
+    --bs-btn-bg: #fef3c7;
+    --bs-btn-border-color: #fde68a;
+
+    --bs-btn-hover-color: #78350f;
+    --bs-btn-hover-bg: #fde68a;
+    --bs-btn-hover-border-color: #fcd34d;
+
+    --bs-btn-active-color: #78350f;
+    --bs-btn-active-bg: #fcd34d;
+    --bs-btn-active-border-color: #f59e0b;
+}
+
+[data-bs-theme="dark"] .admin-action-button--pause {
+    --bs-btn-color: #fde68a;
+    --bs-btn-bg: #78350f;
+    --bs-btn-border-color: #92400e;
+
+    --bs-btn-hover-color: #fef3c7;
+    --bs-btn-hover-bg: #92400e;
+    --bs-btn-hover-border-color: #b45309;
+
+    --bs-btn-active-color: #fef3c7;
+    --bs-btn-active-bg: #92400e;
+    --bs-btn-active-border-color: #b45309;
+}
+
+.admin-action-button--archive,
+.admin-form-cancel {
+    --bs-btn-color: var(--bs-secondary-color);
+    --bs-btn-border-color: var(--rg-border);
+
+    --bs-btn-hover-color: var(--bs-body-color);
+    --bs-btn-hover-bg: var(--bs-secondary-bg);
+    --bs-btn-hover-border-color: var(--rg-border);
+
+    --bs-btn-active-color: var(--bs-body-color);
+    --bs-btn-active-bg: var(--bs-secondary-bg);
+    --bs-btn-active-border-color: var(--rg-border);
+
+    font-weight: 600;
+}
+
+
+/* ==========================================================================
+   Campaign Table
+   ========================================================================== */
+
+.admin-table-card {
+    overflow: hidden;
+}
+
+.admin-table-card .table {
+    --bs-table-bg: var(--rg-card-bg);
+    --bs-table-color: var(--bs-body-color);
+    --bs-table-border-color: var(--rg-border);
+}
+
+.admin-table-card .table thead th {
+    background-color: var(--bs-secondary-bg);
+    color: var(--bs-secondary-color);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.admin-table-card .table > :not(caption) > * > * {
+    padding-top: 0.9rem;
+    padding-bottom: 0.9rem;
+}
+
+.admin-table-card .table > tbody > tr {
+    transition: background-color 0.15s ease;
+}
+
+.admin-table-card .table > tbody > tr:hover {
+    --bs-table-hover-bg: var(--bs-secondary-bg);
+}
+
+.admin-campaign-link {
+    color: var(--rg-primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.admin-campaign-link:hover {
+    color: var(--rg-primary-hover);
+    text-decoration: underline;
+}
+
+
+/* ==========================================================================
+   Status Badges
+   ========================================================================== */
+
+.admin-status-badge {
+    border: 1px solid transparent;
+    font-weight: 600;
+}
+
+.admin-status-badge--active {
+    background-color: #dcfce7;
+    color: #166534;
+    border-color: #bbf7d0;
+}
+
+.admin-status-badge--paused {
+    background-color: #fef3c7;
+    color: #92400e;
+    border-color: #fde68a;
+}
+
+.admin-status-badge--draft,
+.admin-status-badge--archived {
+    background-color: var(--bs-secondary-bg);
+    color: var(--bs-secondary-color);
+    border-color: var(--rg-border);
+}
+
+[data-bs-theme="dark"] .admin-status-badge--active {
+    background-color: #14532d;
+    color: #bbf7d0;
+    border-color: #166534;
+}
+
+[data-bs-theme="dark"] .admin-status-badge--paused {
+    background-color: #78350f;
+    color: #fde68a;
+    border-color: #92400e;
+}
+
+
+/* ==========================================================================
+   Campaign Details
+   ========================================================================== */
+
+.admin-details-list dt {
+    color: var(--bs-secondary-color);
+    font-weight: 600;
+}
+
+.admin-details-list dd {
+    color: var(--bs-body-color);
+    font-weight: 500;
+}
+
+.admin-details-list dt,
+.admin-details-list dd {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
     margin-bottom: 0;
 }
+
+.admin-details-list dt:nth-of-type(n + 2),
+.admin-details-list dd:nth-of-type(n + 2) {
+    border-top: 1px solid var(--rg-border);
+}
+
+
+/* ==========================================================================
+   Forms
+   ========================================================================== */
+
+.form-label {
+    font-weight: 600;
+}
+
+.form-control,
+.form-select {
+    border-color: var(--rg-border);
+    background-color: var(--rg-card-bg);
+    color: var(--bs-body-color);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--rg-primary);
+    box-shadow: 0 0 0 0.2rem
+        color-mix(in srgb, var(--rg-primary) 20%, transparent);
+}
+
+.form-control::placeholder {
+    color: var(--bs-secondary-color);
+}
+
+.form-text {
+    color: var(--bs-secondary-color);
+}
+
+.form-check-input:checked {
+    background-color: var(--rg-primary);
+    border-color: var(--rg-primary);
+}
+
+.form-check-input:focus {
+    border-color: var(--rg-primary);
+    box-shadow: 0 0 0 0.2rem
+        color-mix(in srgb, var(--rg-primary) 20%, transparent);
+}
+
+.admin-form-section {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--rg-border);
+}
+
+.admin-form-section h2 {
+    color: var(--bs-body-color);
+    font-weight: 700;
+}
+
+.admin-form-actions {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--rg-border);
+}
+
+
+/* ==========================================================================
+   Authentication
+   ========================================================================== */
 
 .admin-auth-card {
     width: min(100%, 420px);
     margin: 0 auto;
 }
 
-.admin-table-card {
-    overflow: hidden;
+.admin-auth-card .card {
+    background-color: var(--rg-card-bg);
+    border-color: var(--rg-border);
 }
 
-@media (min-width: 992px) {
-    .admin-sidebar {
-        position: sticky;
-        top: 0;
-        height: 100vh;
-        flex: 0 0 var(--rg-sidebar-width);
-    }
+.admin-auth-card .card-body {
+    padding: 2rem;
+}
+
+.admin-auth-card h1 {
+    color: var(--rg-primary);
+    font-weight: 700;
 }

@@ -16,7 +16,7 @@
     <div class="d-flex flex-wrap gap-2">
         <a
             href="/admin/campaigns/<?= (int)$campaign['id'] ?>/edit"
-            class="btn btn-primary"
+            class="admin-action-button btn btn-primary"
         >
             Edit Campaign
         </a>
@@ -38,7 +38,7 @@
 
                 <button
                     type="submit"
-                    class="btn btn-outline-warning"
+                    class="admin-action-button admin-action-button--pause btn"
                 >
                     Pause Campaign
                 </button>
@@ -60,7 +60,7 @@
 
                 <button
                     type="submit"
-                    class="btn btn-success"
+                    class="admin-action-button admin-action-button--activate btn btn-success"
                 >
                     Activate Campaign
                 </button>
@@ -82,7 +82,7 @@
 
                 <button
                     type="submit"
-                    class="btn btn-success"
+                    class="admin-action-button admin-action-button--activate btn btn-success"
                 >
                     Activate Campaign
                 </button>
@@ -107,7 +107,7 @@
 
                 <button
                     type="submit"
-                    class="btn btn-outline-secondary"
+                    class="admin-action-button admin-action-button--archive btn"
                 >
                     Archive Campaign
                 </button>
@@ -118,17 +118,29 @@
 
 <div class="card shadow-sm">
     <div class="card-body">
-        <dl class="row mb-0">
+        <dl class="row mb-0 admin-details-list">
             <dt class="col-sm-4">
                 Status
             </dt>
 
             <dd class="col-sm-8">
-                <?= htmlspecialchars(
-                    $campaign['status'],
-                    ENT_QUOTES,
-                    'UTF-8'
-                ) ?>
+                <?php
+                $statusClass = match ($campaign['status']) {
+                    'active' => 'admin-status-badge--active',
+                    'paused' => 'admin-status-badge--paused',
+                    'draft' => 'admin-status-badge--draft',
+                    'archived' => 'admin-status-badge--archived',
+                    default => 'admin-status-badge--draft',
+                };
+                ?>
+
+                <span class="badge admin-status-badge <?= $statusClass ?>">
+                    <?= htmlspecialchars(
+                        ucfirst($campaign['status']),
+                        ENT_QUOTES,
+                        'UTF-8'
+                    ) ?>
+                </span>
             </dd>
 
             <dt class="col-sm-4">
@@ -143,14 +155,16 @@
                 ) ?>
             </dd>
 
-            <dt class="col-sm-4">
-                Timer duration
-            </dt>
+            <?php if ($campaign['unlock_method'] === 'timer'): ?>
+                <dt class="col-sm-4">
+                    Timer duration
+                </dt>
 
-            <dd class="col-sm-8">
-                <?= (int)$campaign['timer_duration_seconds'] ?>
-                seconds
-            </dd>
+                <dd class="col-sm-8">
+                    <?= (int)$campaign['timer_duration_seconds'] ?>
+                    seconds
+                </dd>
+            <?php endif; ?>
         </dl>
     </div>
 </div>

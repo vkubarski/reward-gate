@@ -23,6 +23,35 @@ return static function (Router $router) use ($pdo, $appConfig): void {
     $campaignRepository = new CampaignRepository($pdo);
     $campaignService = new CampaignService($campaignRepository);
 
+    // For demo campaigns
+    $findDemoCampaignId = static function (
+        string $name
+    ) use ($pdo): int {
+        $statement = $pdo->prepare(
+            'SELECT id
+             FROM campaigns
+             WHERE name = :name
+               AND status = :status
+             LIMIT 1'
+        );
+
+        $statement->execute([
+            'name' => $name,
+            'status' => 'active',
+        ]);
+
+        $campaign = $statement->fetch();
+
+        if ($campaign === false) {
+            throw new RuntimeException(
+                "Demo campaign '{$name}' is not configured. "
+                . 'Run: vendor/bin/phinx seed:run'
+            );
+        }
+
+        return (int)$campaign['id'];
+    };
+
     $csrfToken = new CsrfToken();
 
     $campaignController = new CampaignController(
@@ -157,9 +186,38 @@ return static function (Router $router) use ($pdo, $appConfig): void {
     );
 
     $router->get(
-        '/demo',
-        static function(): void {
-            require __DIR__ . '/../views/demo.php';
+        '/demo-popup',
+        static function() use ($findDemoCampaignId): void {
+            try {
+                $demoCampaignId = $findDemoCampaignId(
+                    'Demo Popup Gate'
+                );
+            } catch (RuntimeException $exception) {
+                http_response_code(500);
+                echo $exception->getMessage();
+
+                return;
+            }
+
+            require __DIR__ . '/../views/demo-popup.php';
+        }
+    );
+
+    $router->get(
+        '/demo-content',
+        static function() use ($findDemoCampaignId): void {
+            try {
+                $demoCampaignId = $findDemoCampaignId(
+                    'Demo Content Gate'
+                );
+            } catch (RuntimeException $exception) {
+                http_response_code(500);
+                echo $exception->getMessage();
+
+                return;
+            }
+
+            require __DIR__ . '/../views/demo-content.php';
         }
     );
 
