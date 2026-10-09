@@ -58,16 +58,42 @@ final class AdminAuthControllerTest extends TestCase
         $_POST = [ 'username' => ' admin ', 'password' => 'wrong-password', ];
         $output = $this->captureOutput(fn () => $this->createController($adminAuthService, $adminSession, $csrfToken)->login());
         $this->assertStringContainsString('Invalid username or password.', $output);
-    } public function testLogoutReturnsForbiddenForInvalidCsrfToken(): void
+    }
+
+    public function testLogoutReturnsForbiddenForInvalidCsrfToken(): void
     {
         $adminAuthService = $this->createStub(AdminAuthServiceInterface::class);
+
         $adminSession = $this->createMock(AdminSessionInterface::class);
-        $adminSession ->expects($this->never()) ->method('logout');
+        $adminSession
+            ->expects($this->once())
+            ->method('isAuthenticated')
+            ->willReturn(true);
+        $adminSession
+            ->expects($this->never())
+            ->method('logout');
+
         $csrfToken = $this->createMock(CsrfTokenInterface::class);
-        $csrfToken ->expects($this->once()) ->method('validate') ->with(null) ->willReturn(false);
+        $csrfToken
+            ->expects($this->once())
+            ->method('validate')
+            ->with(null)
+            ->willReturn(false);
+
         $_POST = [];
+
         http_response_code(200);
-        $output = $this->captureOutput(fn () => $this->createController($adminAuthService, $adminSession, $csrfToken)->logout());
+
+        $output = $this->captureOutput(
+            fn () => $this
+                ->createController(
+                    $adminAuthService,
+                    $adminSession,
+                    $csrfToken
+                )
+                ->logout()
+        );
+
         $this->assertSame(403, http_response_code());
         $this->assertSame('Invalid CSRF token', $output);
     }

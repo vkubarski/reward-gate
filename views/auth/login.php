@@ -9,7 +9,20 @@ $error ??= null;
     <div class="card shadow-sm">
         <div class="card-body p-4 p-sm-5">
             <div class="text-center mb-4">
-                <h1 class="h3 mb-2">
+                <img
+                    src="/assets/brand/logo-light.svg"
+                    alt="Reward Gate"
+                    class="admin-auth-logo admin-auth-logo--light"
+                >
+
+                <img
+                    src="/assets/brand/logo-dark.svg"
+                    alt=""
+                    aria-hidden="true"
+                    class="admin-auth-logo admin-auth-logo--dark"
+                >
+
+                <h1 class="h3 mb-1 admin-auth-brand">
                     Reward Gate
                 </h1>
 

@@ -26,7 +26,7 @@ final class Router
         $this->routes[$method][$path] = $handler;
     }
 
-    public function dispatch(string $method, string $path): void
+    public function dispatch(string $method, string $path): bool
     {
         $path = rtrim($path, '/');
 
@@ -59,10 +59,12 @@ final class Router
 
             $handler($params);
 
-            return;
+            return true;
         }
 
-        http_response_code(404);
-        echo 'Not Found';
+        // http_response_code(404);
+        // echo 'Not Found';
+
+        return false;
     }
 }

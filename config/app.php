@@ -6,4 +6,8 @@ return [
     'name' => 'Reward Gate',
     'environment' => 'development',
     'version' => '0.2.0',
+
+    'admin' => [
+        'campaigns_per_page' => 20,
+    ],
 ];

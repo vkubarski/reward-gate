@@ -15,8 +15,10 @@ final class CampaignControllerTest extends TestCase
 {
     private function createController(CampaignServiceInterface $campaignService, CsrfTokenInterface $csrfToken): CampaignController
     {
-        return new CampaignController($campaignService, $csrfToken);
-    } private function captureResponse(callable $callback): array
+        return new CampaignController($campaignService, $csrfToken, 20);
+    }
+
+    private function captureResponse(callable $callback): array
     {
         http_response_code(200);
         ob_start();
@@ -829,5 +831,124 @@ final class CampaignControllerTest extends TestCase
             'Campaign is already archived.',
             $response['body']
         );
+    }
+
+    public function testIndexUsesDefaultPaginationAndSortValues(): void
+    {
+        $campaignService = $this->createMock(
+            CampaignServiceInterface::class
+        );
+
+        $campaignService
+            ->expects($this->once())
+            ->method('findPaginated')
+            ->with(
+                1,
+                20,
+                'created_at',
+                'DESC',
+                ''
+            )
+            ->willReturn([
+                'campaigns' => [],
+                'pagination' => [
+                    'current_page' => 1,
+                    'per_page' => 20,
+                    'total_items' => 0,
+                    'total_pages' => 0,
+                ],
+                'sort' => [
+                    'column' => 'created_at',
+                    'direction' => 'DESC',
+                ],
+                'search' => '',
+            ]);
+
+        $csrfToken = $this->createStub(
+            CsrfTokenInterface::class
+        );
+
+        $_GET = [];
+
+        try {
+            $controller = $this->createController(
+                $campaignService,
+                $csrfToken
+            );
+
+            $response = $this->captureResponse(
+                fn () => $controller->index()
+            );
+
+            $this->assertSame(200, $response['status']);
+            $this->assertStringContainsString(
+                'Campaigns',
+                $response['body']
+            );
+        } finally {
+            $_GET = [];
+        }
+    }
+
+    public function testIndexPassesPaginationSortAndSearchParameters(): void
+    {
+        $campaignService = $this->createMock(
+            CampaignServiceInterface::class
+        );
+
+        $campaignService
+            ->expects($this->once())
+            ->method('findPaginated')
+            ->with(
+                2,
+                20,
+                'name',
+                'ASC',
+                'summer'
+            )
+            ->willReturn([
+                'campaigns' => [],
+                'pagination' => [
+                    'current_page' => 2,
+                    'per_page' => 20,
+                    'total_items' => 25,
+                    'total_pages' => 2,
+                ],
+                'sort' => [
+                    'column' => 'name',
+                    'direction' => 'ASC',
+                ],
+                'search' => 'summer',
+            ]);
+
+        $csrfToken = $this->createStub(
+            CsrfTokenInterface::class
+        );
+
+        $_GET = [
+            'page' => '2',
+            'sort' => 'name',
+            'direction' => 'ASC',
+            'search' => '  summer  ',
+        ];
+
+        try {
+            $controller = $this->createController(
+                $campaignService,
+                $csrfToken
+            );
+
+            $response = $this->captureResponse(
+                fn () => $controller->index()
+            );
+
+            $this->assertSame(200, $response['status']);
+            $this->assertStringContainsString(
+                'Campaigns',
+                $response['body']
+            );
+        } finally {
+            $_GET = [];
+        }
     }
 }

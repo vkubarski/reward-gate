@@ -28,13 +28,6 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
 
-$pdo = new PDO(
-    "mysql:host={$dbConfig['host']};dbname={$dbConfig['database']};charset={$dbConfig['charset']}",
-    $dbConfig['username'],
-    $dbConfig['password'],
-    [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    ]
+$pdo = \RewardGate\Database\Connection::create(
+    $dbConfig
 );
-

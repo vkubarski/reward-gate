@@ -1,3 +1,7 @@
+/* ==========================================================================
+   Theme Variables
+   ========================================================================== */
+
 :root {
     --rg-sidebar-width: 240px;
 
@@ -81,14 +85,70 @@ body {
 
 
 /* ==========================================================================
-   Navigation
+   Branding & Logos
    ========================================================================== */
 
+/* Sidebar brand */
+
 .admin-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+
     color: var(--rg-primary);
-    font-size: 1.15rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.admin-brand__name {
+    position: relative;
+    top: 3px;
+}
+
+.admin-brand__logo,
+.admin-auth-logo {
+    display: block;
+    height: auto;
+}
+
+.admin-brand__logo {
+    width: 40px;
+}
+
+/* Login logo */
+
+.admin-auth-logo {
+    width: 72px;
+    margin: 0 auto 0.75rem;
+}
+
+.admin-auth-brand {
+    color: var(--rg-primary);
     font-weight: 700;
 }
+
+/* Theme-specific logo visibility */
+
+.admin-brand__logo--dark,
+.admin-auth-logo--dark {
+    display: none;
+}
+
+[data-bs-theme="dark"] .admin-brand__logo--light,
+[data-bs-theme="dark"] .admin-auth-logo--light {
+    display: none;
+}
+
+[data-bs-theme="dark"] .admin-brand__logo--dark,
+[data-bs-theme="dark"] .admin-auth-logo--dark {
+    display: block;
+}
+
+
+/* ==========================================================================
+   Navigation
+   ========================================================================== */
 
 .admin-nav-section-title {
     margin-bottom: 0.5rem;

@@ -52,6 +52,125 @@
         applyTheme(getThemePreference());
     }
 
+    function formatCampaignCreatedAt() {
+        document.querySelectorAll('[data-created-at]').forEach(
+            (element) => {
+                const date = new Date(
+                    element.dataset.createdAt
+                );
+
+                if (Number.isNaN(date.getTime())) {
+                    return;
+                }
+
+                const parts = new Intl.DateTimeFormat(
+                    'en-US',
+                    {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hourCycle: 'h23',
+                    }
+                ).formatToParts(date);
+
+                const values = Object.fromEntries(
+                    parts.map((part) => [
+                        part.type,
+                        part.value,
+                    ])
+                );
+
+                element.textContent =
+                    `${values.month} ${values.day}, `
+                    + `${values.year} `
+                    + `${values.hour}:${values.minute}`;
+            }
+        );
+    }
+
+    function restoreListSort({
+        path,
+        storageKey,
+        sortableColumns,
+    }) {
+        if (window.location.pathname !== path) {
+            return;
+        }
+
+        const url = new URL(window.location.href);
+        const sort = url.searchParams.get('sort');
+        const direction = url.searchParams.get('direction');
+
+        if (sort !== null || direction !== null) {
+            if (
+                sortableColumns.includes(sort)
+                && (
+                    direction === 'asc'
+                    || direction === 'desc'
+                )
+            ) {
+                localStorage.setItem(
+                    storageKey,
+                    JSON.stringify({
+                        column: sort,
+                        direction: direction,
+                    })
+                );
+            }
+
+            return;
+        }
+
+        const savedSort = localStorage.getItem(
+            storageKey
+        );
+
+        if (savedSort === null) {
+            return;
+        }
+
+        let preference;
+
+        try {
+            preference = JSON.parse(savedSort);
+        } catch {
+            localStorage.removeItem(storageKey);
+
+            return;
+        }
+
+        if (
+            !preference
+            || !sortableColumns.includes(
+                preference.column
+            )
+            || (
+                preference.direction !== 'asc'
+                && preference.direction !== 'desc'
+            )
+        ) {
+            localStorage.removeItem(storageKey);
+
+            return;
+        }
+
+        url.searchParams.set(
+            'sort',
+            preference.column
+        );
+
+        url.searchParams.set(
+            'direction',
+            preference.direction
+        );
+
+        window.location.replace(
+            url.toString()
+        );
+    }
+
     document.querySelectorAll('[data-theme-value]').forEach(
         (button) => {
             button.addEventListener('click', () => {
@@ -74,6 +193,18 @@
     });
 
     updateTheme();
+    formatCampaignCreatedAt();
+
+    restoreListSort({
+        path: '/admin/campaigns',
+        storageKey: 'rg-admin-campaign-list-sort',
+        sortableColumns: [
+            'name',
+            'presentation_type',
+            'status',
+            'created_at',
+        ],
+    });
 
     const presentationType = document.querySelector(
         '#presentation_type'
@@ -81,6 +212,10 @@
 
     const unlockMethod = document.querySelector(
         '#unlock_method'
+    );
+
+    const unlockCombinationWarning = document.querySelector(
+        '#unlock-combination-warning'
     );
 
     if (presentationType && unlockMethod) {
@@ -114,6 +249,29 @@
 
                 section.hidden = !matchesUnlockMethod;
             });
+
+            if (unlockCombinationWarning) {
+                if (
+                    presentationType.value === 'content'
+                    && unlockMethod.value === 'timer'
+                ) {
+                    unlockCombinationWarning.textContent =
+                        'Content Gate currently requires the Click unlock method. Please select Click to configure the Content Gate settings.';
+
+                    unlockCombinationWarning.classList.remove('d-none');
+                } else if (
+                    presentationType.value === 'popup'
+                    && unlockMethod.value === 'click'
+                ) {
+                    unlockCombinationWarning.textContent =
+                        'Popup Gate currently requires the Timer unlock method. Please select Timer to configure the Popup Gate settings.';
+
+                    unlockCombinationWarning.classList.remove('d-none');
+                } else {
+                    unlockCombinationWarning.classList.add('d-none');
+                    unlockCombinationWarning.textContent = '';
+                }
+            }
         }
 
         presentationType.addEventListener(

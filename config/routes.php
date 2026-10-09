@@ -56,7 +56,8 @@ return static function (Router $router) use ($pdo, $appConfig): void {
 
     $campaignController = new CampaignController(
         $campaignService,
-        $csrfToken
+        $csrfToken,
+        $appConfig['admin']['campaigns_per_page']
     );
 
     $unlockSessionRepository = new UnlockSessionRepository($pdo);
@@ -91,6 +92,16 @@ return static function (Router $router) use ($pdo, $appConfig): void {
     );
 
     $adminAuthGuard = new AdminAuthGuard($adminSession);
+
+    $router->get(
+        '/admin',
+        $adminAuthGuard->protect(
+            static function(): void {
+                header('Location: /admin/campaigns');
+                exit;
+            }
+        )
+    );
 
     $router->get(
         '/admin/campaigns',

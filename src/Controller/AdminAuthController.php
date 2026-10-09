@@ -72,6 +72,11 @@ final class AdminAuthController
 
     public function logout(): void
     {
+        if (!$this->adminSession->isAuthenticated()) {
+            header('Location: /admin/login');
+            exit;
+        }
+
         if (
             !$this->csrfToken->validate(
                 $_POST['csrf_token'] ?? null

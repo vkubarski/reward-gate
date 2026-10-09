@@ -896,4 +896,234 @@ final class CampaignServiceTest extends TestCase
 
         $this->assertSame(42, $result);
     }
+
+    public function testFindPaginatedReturnsPageAndPaginationMetadata(): void
+    {
+        $campaignRepository = $this->createMock(
+            CampaignRepositoryInterface::class
+        );
+
+        $campaigns = [
+            [
+                'id' => 21,
+                'name' => 'Campaign 21',
+            ],
+            [
+                'id' => 22,
+                'name' => 'Campaign 22',
+            ],
+        ];
+
+        $campaignRepository
+            ->expects($this->once())
+            ->method('countAll')
+            ->with('')
+            ->willReturn(45);
+
+        $campaignRepository
+            ->expects($this->once())
+            ->method('findAll')
+            ->with(
+                'created_at',
+                'DESC',
+                20,
+                20,
+                ''
+            )
+            ->willReturn($campaigns);
+
+        $service = new CampaignService(
+            $campaignRepository
+        );
+
+        $result = $service->findPaginated(
+            2,
+            20
+        );
+
+        $this->assertSame($campaigns, $result['campaigns']);
+
+        $this->assertSame(
+            [
+                'current_page' => 2,
+                'per_page' => 20,
+                'total_items' => 45,
+                'total_pages' => 3,
+            ],
+            $result['pagination']
+        );
+
+        $this->assertSame(
+            [
+                'column' => 'created_at',
+                'direction' => 'DESC',
+            ],
+            $result['sort']
+        );
+
+        $this->assertSame('', $result['search']);
+    }
+
+    public function testFindPaginatedPassesSearchAndSortToRepository(): void
+    {
+        $campaignRepository = $this->createMock(
+            CampaignRepositoryInterface::class
+        );
+
+        $campaignRepository
+            ->expects($this->once())
+            ->method('countAll')
+            ->with('summer')
+            ->willReturn(7);
+
+        $campaignRepository
+            ->expects($this->once())
+            ->method('findAll')
+            ->with(
+                'name',
+                'ASC',
+                10,
+                0,
+                'summer'
+            )
+            ->willReturn([]);
+
+        $service = new CampaignService(
+            $campaignRepository
+        );
+
+        $result = $service->findPaginated(
+            1,
+            10,
+            'name',
+            'ASC',
+            'summer'
+        );
+
+        $this->assertSame([], $result['campaigns']);
+
+        $this->assertSame(
+            [
+                'column' => 'name',
+                'direction' => 'ASC',
+            ],
+            $result['sort']
+        );
+
+        $this->assertSame('summer', $result['search']);
+
+        $this->assertSame(1, $result['pagination']['current_page']);
+        $this->assertSame(10, $result['pagination']['per_page']);
+        $this->assertSame(7, $result['pagination']['total_items']);
+        $this->assertSame(1, $result['pagination']['total_pages']);
+    }
+
+    public function testFindPaginatedHandlesZeroCampaigns(): void
+    {
+        $campaignRepository = $this->createMock(
+            CampaignRepositoryInterface::class
+        );
+
+        $campaignRepository
+            ->expects($this->once())
+            ->method('countAll')
+            ->with('')
+            ->willReturn(0);
+
+        $campaignRepository
+            ->expects($this->once())
+            ->method('findAll')
+            ->with(
+                'created_at',
+                'DESC',
+                20,
+                0,
+                ''
+            )
+            ->willReturn([]);
+
+        $service = new CampaignService(
+            $campaignRepository
+        );
+
+        $result = $service->findPaginated(1, 20);
+
+        $this->assertSame([], $result['campaigns']);
+        $this->assertSame(0, $result['pagination']['total_items']);
+        $this->assertSame(0, $result['pagination']['total_pages']);
+        $this->assertSame(1, $result['pagination']['current_page']);
+    }
+
+    public function testFindPaginatedRejectsPageBelowOne(): void
+    {
+        $campaignRepository = $this->createMock(
+            CampaignRepositoryInterface::class
+        );
+
+        $campaignRepository
+            ->expects($this->never())
+            ->method('countAll');
+
+        $service = new CampaignService(
+            $campaignRepository
+        );
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage(
+            'Page must be greater than zero.'
+        );
+
+        $service->findPaginated(0, 20);
+    }
+
+    public function testFindPaginatedClampsPageBeyondLastPage(): void
+    {
+        $campaignRepository = $this->createMock(
+            CampaignRepositoryInterface::class
+        );
+
+        $campaigns = [
+            [
+                'id' => 41,
+                'name' => 'Campaign 41',
+            ],
+        ];
+
+        $campaignRepository
+            ->expects($this->once())
+            ->method('countAll')
+            ->with('')
+            ->willReturn(41);
+
+        $campaignRepository
+            ->expects($this->once())
+            ->method('findAll')
+            ->with(
+                'created_at',
+                'DESC',
+                20,
+                40,
+                ''
+            )
+            ->willReturn($campaigns);
+
+        $service = new CampaignService(
+            $campaignRepository
+        );
+
+        $result = $service->findPaginated(99, 20);
+
+        $this->assertSame(
+            3,
+            $result['pagination']['current_page']
+        );
+
+        $this->assertSame(
+            3,
+            $result['pagination']['total_pages']
+        );
+
+        $this->assertSame($campaigns, $result['campaigns']);
+    }
+
 }

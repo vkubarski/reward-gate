@@ -199,6 +199,63 @@ final class CampaignService implements CampaignServiceInterface
         return $this->campaignRepository->update($id, $data);
     }
 
+    public function findPaginated(
+        int $page,
+        int $perPage,
+        string $orderBy = 'created_at',
+        string $direction = 'DESC',
+        string $search = '',
+    ): array {
+        if ($page < 1) {
+            throw new InvalidArgumentException(
+                'Page must be greater than zero.'
+            );
+        }
+
+        if ($perPage < 1) {
+            throw new InvalidArgumentException(
+                'Items per page must be greater than zero.'
+            );
+        }
+
+        $totalItems = $this->campaignRepository->countAll(
+            $search
+        );
+
+        $totalPages = $totalItems === 0
+            ? 0
+            : (int) ceil($totalItems / $perPage);
+
+        if ($totalPages > 0 && $page > $totalPages) {
+            $page = $totalPages;
+        }
+
+        $offset = ($page - 1) * $perPage;
+
+        $campaigns = $this->campaignRepository->findAll(
+            $orderBy,
+            $direction,
+            $perPage,
+            $offset,
+            $search
+        );
+
+        return [
+            'campaigns' => $campaigns,
+            'pagination' => [
+                'current_page' => $page,
+                'per_page' => $perPage,
+                'total_items' => $totalItems,
+                'total_pages' => $totalPages,
+            ],
+            'sort' => [
+                'column' => $orderBy,
+                'direction' => strtoupper($direction),
+            ],
+            'search' => $search,
+        ];
+    }
+
     private function assertValidPresentationUnlockCombination(
         string $presentationType,
         string $unlockMethod,

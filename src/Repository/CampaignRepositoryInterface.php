@@ -26,7 +26,12 @@ interface CampaignRepositoryInterface
         string $direction = 'DESC',
         int $limit = 20,
         int $offset = 0,
+        string $search = '',
     ): array;
+
+    public function countAll(
+        string $search = '',
+    ): int;
 
     public function update(int $id, array $data): bool;
 }

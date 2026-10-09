@@ -12,17 +12,41 @@ final class CampaignController
 {
     public function __construct(
         private CampaignServiceInterface $campaignService,
-        private CsrfTokenInterface $csrfToken
+        private CsrfTokenInterface $csrfToken,
+        private int $campaignsPerPage
     ) {
     }
 
     public function index(): void
     {
-        $campaigns = $this->campaignService->findAll();
+        $page = max(
+            1,
+            (int) ($_GET['page'] ?? 1)
+        );
+
+        $sort = (string) (
+            $_GET['sort'] ?? 'created_at'
+        );
+
+        $direction = (string) (
+            $_GET['direction'] ?? 'DESC'
+        );
+
+        $search = trim(
+            (string) ($_GET['search'] ?? '')
+        );
+
+        $result = $this->campaignService->findPaginated(
+            $page,
+            $this->campaignsPerPage,
+            $sort,
+            $direction,
+            $search
+        );
 
         $this->render('campaigns/index', [
             'title' => 'Campaigns',
-            'campaigns' => $campaigns,
+            ...$result,
         ]);
     }
 

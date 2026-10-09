@@ -10,7 +10,30 @@ declare(strict_types=1);
         name="viewport"
         content="width=device-width, initial-scale=1.0"
     >
+    <link
+        rel="icon"
+        href="/assets/brand/favicon.svg"
+        type="image/svg+xml"
+    >
 
+    <link
+        rel="icon"
+        href="/assets/brand/favicon-32.png"
+        type="image/png"
+        sizes="32x32"
+    >
+
+    <link
+        rel="icon"
+        href="/assets/brand/favicon-16.png"
+        type="image/png"
+        sizes="16x16"
+    >
+
+    <link
+        rel="apple-touch-icon"
+        href="/assets/brand/apple-touch-icon.png"
+    >
     <script>
         (() => {
             const savedTheme = localStorage.getItem('rg-theme');
@@ -66,9 +89,23 @@ declare(strict_types=1);
                         class="text-decoration-none admin-brand"
                         id="adminSidebarLabel"
                     >
-                        Reward Gate
-                    </a>
+                        <img
+                            src="/assets/brand/logo-light.svg"
+                            alt="Reward Gate"
+                            class="admin-brand__logo admin-brand__logo--light"
+                        >
 
+                        <img
+                            src="/assets/brand/logo-dark.svg"
+                            alt=""
+                            aria-hidden="true"
+                            class="admin-brand__logo admin-brand__logo--dark"
+                        >
+
+                        <span class="admin-brand__name">
+                            Reward Gate
+                        </span>
+                    </a>
                     <button
                         type="button"
                         class="btn-close d-lg-none"
@@ -90,7 +127,6 @@ declare(strict_types=1);
                     >
                         <span>Campaigns</span>
                     </a>
-                    <a
                 </div>
             </nav>
 
@@ -137,11 +173,7 @@ declare(strict_types=1);
                         >
                             <span aria-hidden="true">☰</span>
                         </button>
-
-                        <span class="fw-semibold d-none d-sm-inline">
-                            Reward Gate
-                        </span>
-                    </div>
+                   </div>
 
                     <div class="dropdown">
                         <button

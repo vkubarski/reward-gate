@@ -132,8 +132,7 @@ final class UnlockSessionService implements UnlockSessionServiceInterface
     public function complete(
         string $token,
         ?string $visitorId = null,
-    ): void
-    {
+    ): void {
         if ($token === '') {
             throw new InvalidArgumentException(
                 'Unlock token is required.'

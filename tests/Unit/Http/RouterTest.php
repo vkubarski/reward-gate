@@ -71,22 +71,38 @@ final class RouterTest extends TestCase
         $this->assertTrue($called);
         $this->assertSame([], $receivedParams);
         $this->assertSame(200, http_response_code());
-    } public function testDispatchReturnsNotFoundForUnknownRoute(): void
+    }
+
+    public function testDispatchReturnsFalseForUnknownRoute(): void
     {
         $router = new Router();
-        $router->dispatch('GET', '/does-not-exist');
-        $this->assertSame(404, http_response_code());
-        $this->assertSame('Not Found', ob_get_contents());
-    } public function testDispatchReturnsNotFoundForWrongMethod(): void
+
+        $matched = $router->dispatch(
+            'GET',
+            '/does-not-exist'
+        );
+
+        $this->assertFalse($matched);
+    }
+
+    public function testDispatchReturnsFalseForWrongMethod(): void
     {
         $router = new Router();
         $called = false;
-        $router->get('/test', function (array $params) use (&$called): void {
-            $called = true;
-        });
-        $router->dispatch('POST', '/test');
+
+        $router->get(
+            '/test',
+            function (array $params) use (&$called): void {
+                $called = true;
+            }
+        );
+
+        $matched = $router->dispatch(
+            'POST',
+            '/test'
+        );
+
         $this->assertFalse($called);
-        $this->assertSame(404, http_response_code());
-        $this->assertSame('Not Found', ob_get_contents());
+        $this->assertFalse($matched);
     }
 }

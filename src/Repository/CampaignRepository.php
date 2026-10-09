@@ -120,42 +120,83 @@ final class CampaignRepository implements CampaignRepositoryInterface
         string $direction = 'DESC',
         int $limit = 20,
         int $offset = 0,
+        string $search = '',
     ): array {
-        $orderBy = match($orderBy) {
+        $orderBy = match ($orderBy) {
             'id' => 'id',
             'name' => 'name',
+            'presentation_type' => 'presentation_type',
             'status' => 'status',
             'created_at' => 'created_at',
             'updated_at' => 'updated_at',
             default => 'created_at',
         };
 
-        $direction = match(strtoupper($direction)) {
+        $direction = match (strtoupper($direction)) {
             'ASC' => 'ASC',
             'DESC' => 'DESC',
             default => 'DESC',
         };
 
         if ($limit < 1) {
-            throw new InvalidArgumentException('Limit must be greater than zero.');
+            throw new InvalidArgumentException(
+                'Limit must be greater than zero.'
+            );
         }
 
         if ($offset < 0) {
-            throw new InvalidArgumentException('Offset cannot be negative.');
+            throw new InvalidArgumentException(
+                'Offset cannot be negative.'
+            );
         }
 
-        $statement = $this->pdo->query(
-            "SELECT *
-             FROM campaigns
-             WHERE status != 'archived'
-             ORDER BY {$orderBy} {$direction}
-             LIMIT {$limit} OFFSET {$offset}"
-        );
+        $sql = "
+            SELECT *
+            FROM campaigns
+            WHERE status != 'archived'
+        ";
+
+        $params = [];
+
+        if ($search !== '') {
+            $sql .= " AND name LIKE :search";
+            $params['search'] = '%' . $search . '%';
+        }
+
+        $sql .= "
+            ORDER BY {$orderBy} {$direction}
+            LIMIT {$limit} OFFSET {$offset}
+        ";
+
+        $statement = $this->pdo->prepare($sql);
+        $statement->execute($params);
 
         return array_map(
             fn (array $campaign): array => $this->hydrate($campaign),
             $statement->fetchAll()
         );
+    }
+
+    public function countAll(
+        string $search = '',
+    ): int {
+        $sql = "
+            SELECT COUNT(*)
+            FROM campaigns
+            WHERE status != 'archived'
+        ";
+
+        $params = [];
+
+        if ($search !== '') {
+            $sql .= " AND name LIKE :search";
+            $params['search'] = '%' . $search . '%';
+        }
+
+        $statement = $this->pdo->prepare($sql);
+        $statement->execute($params);
+
+        return (int) $statement->fetchColumn();
     }
 
     public function update(int $id, array $data): bool

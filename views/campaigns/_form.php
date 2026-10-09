@@ -128,6 +128,12 @@ declare(strict_types=1);
     </div>
 
     <div
+        id="unlock-combination-warning"
+        class="alert alert-warning d-none"
+        role="alert"
+    ></div>
+
+    <div
         class="mb-4"
         data-unlock-settings="timer"
         <?= ($old['unlock_method'] ?? 'timer') !== 'timer'

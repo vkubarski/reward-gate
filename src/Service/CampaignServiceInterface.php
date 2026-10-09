@@ -27,4 +27,12 @@ interface CampaignServiceInterface
     ): array;
 
     public function update(int $id, array $data): bool;
+
+    public function findPaginated(
+        int $page,
+        int $perPage,
+        string $orderBy = 'created_at',
+        string $direction = 'DESC',
+        string $search = '',
+    ): array;
 }

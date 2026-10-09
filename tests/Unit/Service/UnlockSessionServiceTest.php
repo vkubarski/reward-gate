@@ -1705,7 +1705,7 @@ final class UnlockSessionServiceTest extends TestCase
         $this->assertFalse(
             $service->status(1, 'visitor-123')
         );
-        }
+    }
 
     public function testStatusReturnsTrueForAnyCompletionWhenFrequencyLimitIsNull(): void
     {

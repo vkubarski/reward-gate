@@ -402,4 +402,45 @@ final class CampaignRepositoryTest extends IntegrationTestCase
             -1
         );
     }
+
+    public function testFindAllCanSortByPresentationType(): void
+    {
+        $repository = new CampaignRepository($this->pdo);
+
+        $popupId = $repository->create(
+            'Popup Campaign',
+            'popup'
+        );
+
+        $contentId = $repository->create(
+            'Content Campaign',
+            'content'
+        );
+
+        $campaigns = $repository->findAll(
+            'presentation_type',
+            'ASC',
+            10
+        );
+
+        $this->assertSame(
+            $contentId,
+            $campaigns[0]['id']
+        );
+
+        $this->assertSame(
+            'content',
+            $campaigns[0]['presentation_type']
+        );
+
+        $this->assertSame(
+            $popupId,
+            $campaigns[1]['id']
+        );
+
+        $this->assertSame(
+            'popup',
+            $campaigns[1]['presentation_type']
+        );
+    }
 }
