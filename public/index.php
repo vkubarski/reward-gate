@@ -4,8 +4,13 @@ declare(strict_types=1);
 
 use RewardGate\Http\Router;
 
-require_once __DIR__ . '/../bootstrap.php';
-$registerRoutes = require __DIR__ . '/../config/routes.php';
+$rootPath = is_file(__DIR__ . '/bootstrap.php')
+    ? __DIR__
+    : dirname(__DIR__);
+
+require_once $rootPath . '/bootstrap.php';
+
+$registerRoutes = require $rootPath . '/config/routes.php';
 
 $router = new Router(
     \RewardGate\Http\Url::basePath()
