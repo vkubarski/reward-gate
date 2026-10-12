@@ -196,7 +196,7 @@
     formatCampaignCreatedAt();
 
     restoreListSort({
-        path: '/admin/campaigns',
+        path: window.rewardGateUrl('/admin/campaigns'),
         storageKey: 'rg-admin-campaign-list-sort',
         sortableColumns: [
             'name',

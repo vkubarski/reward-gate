@@ -9,6 +9,11 @@ require_once __DIR__ . '/vendor/autoload.php';
 $appConfig = require __DIR__ . '/config/app.php';
 $dbConfig = require __DIR__ . '/config/database.php';
 
+\RewardGate\Http\Url::configure(
+    $appConfig['base_path'] ?? null,
+    $_SERVER['SCRIPT_NAME'] ?? '/index.php'
+);
+
 if (session_status() !== PHP_SESSION_ACTIVE) {
     $isHttps = (
         !empty($_SERVER['HTTPS'])
@@ -19,7 +24,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 
     session_set_cookie_params([
         'lifetime' => 0,
-        'path' => '/',
+        'path' => \RewardGate\Http\Url::basePath() ?: '/',
         'secure' => $isHttps,
         'httponly' => true,
         'samesite' => 'Lax',

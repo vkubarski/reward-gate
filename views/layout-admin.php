@@ -3,7 +3,7 @@
 declare(strict_types=1);
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-base-path="<?= htmlspecialchars(\RewardGate\Http\Url::basePath(), ENT_QUOTES, 'UTF-8') ?>">
 <head>
     <meta charset="UTF-8">
     <meta
@@ -12,27 +12,27 @@ declare(strict_types=1);
     >
     <link
         rel="icon"
-        href="/assets/brand/favicon.svg"
+        href="<?= \RewardGate\Http\Url::to('/assets/brand/favicon.svg') ?>"
         type="image/svg+xml"
     >
 
     <link
         rel="icon"
-        href="/assets/brand/favicon-32.png"
+        href="<?= \RewardGate\Http\Url::to('/assets/brand/favicon-32.png') ?>"
         type="image/png"
         sizes="32x32"
     >
 
     <link
         rel="icon"
-        href="/assets/brand/favicon-16.png"
+        href="<?= \RewardGate\Http\Url::to('/assets/brand/favicon-16.png') ?>"
         type="image/png"
         sizes="16x16"
     >
 
     <link
         rel="apple-touch-icon"
-        href="/assets/brand/apple-touch-icon.png"
+        href="<?= \RewardGate\Http\Url::to('/assets/brand/apple-touch-icon.png') ?>"
     >
     <script>
         (() => {
@@ -61,7 +61,7 @@ declare(strict_types=1);
     >
 
     <link
-        href="/assets/css/admin.css"
+        href="<?= \RewardGate\Http\Url::to('/assets/css/admin.css') ?>"
         rel="stylesheet"
     >
 
@@ -85,18 +85,18 @@ declare(strict_types=1);
             <div class="admin-sidebar-header">
                 <div class="d-flex align-items-center justify-content-between">
                     <a
-                        href="/admin/campaigns"
+                        href="<?= \RewardGate\Http\Url::to('/admin/campaigns') ?>"
                         class="text-decoration-none admin-brand"
                         id="adminSidebarLabel"
                     >
                         <img
-                            src="/assets/brand/logo-light.svg"
+                            src="<?= \RewardGate\Http\Url::to('/assets/brand/logo-light.svg') ?>"
                             alt="Reward Gate"
                             class="admin-brand__logo admin-brand__logo--light"
                         >
 
                         <img
-                            src="/assets/brand/logo-dark.svg"
+                            src="<?= \RewardGate\Http\Url::to('/assets/brand/logo-dark.svg') ?>"
                             alt=""
                             aria-hidden="true"
                             class="admin-brand__logo admin-brand__logo--dark"
@@ -122,7 +122,7 @@ declare(strict_types=1);
                         Campaigns
                     </div>
                     <a
-                        href="/admin/campaigns"
+                        href="<?= \RewardGate\Http\Url::to('/admin/campaigns') ?>"
                         class="admin-nav-link admin-nav-link-active"
                     >
                         <span>Campaigns</span>
@@ -133,7 +133,7 @@ declare(strict_types=1);
             <div class="admin-sidebar-footer px-3 py-3">
                 <form
                     method="post"
-                    action="/admin/logout"
+                    action="<?= \RewardGate\Http\Url::to('/admin/logout') ?>"
                 >
                     <input
                         type="hidden"
@@ -234,7 +234,8 @@ declare(strict_types=1);
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/assets/js/admin.js"></script>
+<script src="<?= \RewardGate\Http\Url::to('/assets/js/url.js') ?>"></script>
+<script src="<?= \RewardGate\Http\Url::to('/assets/js/admin.js') ?>"></script>
 
 </body>
 </html>

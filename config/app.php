@@ -10,4 +10,6 @@ return [
     'admin' => [
         'campaigns_per_page' => 20,
     ],
+
+    'base_path' => null,
 ];

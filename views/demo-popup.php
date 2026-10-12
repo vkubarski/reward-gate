@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-base-path="<?= htmlspecialchars(\RewardGate\Http\Url::basePath(), ENT_QUOTES, 'UTF-8') ?>">
 <head>
     <meta charset="UTF-8">
     <meta
@@ -11,7 +11,7 @@
 
     <link
         rel="stylesheet"
-        href="/assets/popup/popup.css"
+        href="<?= \RewardGate\Http\Url::to('/assets/popup/popup.css') ?>"
     >
 </head>
 <body>
@@ -47,7 +47,8 @@
     </div>
 </main>
 
-<script src="/assets/popup/popup.js"></script>
+<script src="<?= \RewardGate\Http\Url::to('/assets/js/url.js') ?>"></script>
+<script src="<?= \RewardGate\Http\Url::to('/assets/popup/popup.js') ?>"></script>
 
 </body>
 </html>

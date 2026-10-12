@@ -10,13 +10,13 @@ $error ??= null;
         <div class="card-body p-4 p-sm-5">
             <div class="text-center mb-4">
                 <img
-                    src="/assets/brand/logo-light.svg"
+                    src="<?= \RewardGate\Http\Url::to('/assets/brand/logo-light.svg') ?>"
                     alt="Reward Gate"
                     class="admin-auth-logo admin-auth-logo--light"
                 >
 
                 <img
-                    src="/assets/brand/logo-dark.svg"
+                    src="<?= \RewardGate\Http\Url::to('/assets/brand/logo-dark.svg') ?>"
                     alt=""
                     aria-hidden="true"
                     class="admin-auth-logo admin-auth-logo--dark"
@@ -44,7 +44,7 @@ $error ??= null;
                 </div>
             <?php endif; ?>
 
-            <form method="post" action="/admin/login">
+            <form method="post" action="<?= \RewardGate\Http\Url::to('/admin/login') ?>">
                 <div class="mb-3">
                     <label
                         for="username"

@@ -8,6 +8,13 @@ final class Router
 {
     private array $routes = [];
 
+    private readonly string $basePath;
+
+    public function __construct(string $basePath = '')
+    {
+        $this->basePath = rtrim($basePath, '/');
+    }
+
     public function get(string $path, callable $handler): void
     {
         $this->addRoute('GET', $path, $handler);
@@ -28,6 +35,16 @@ final class Router
 
     public function dispatch(string $method, string $path): bool
     {
+        if ($this->basePath !== '') {
+            if ($path === $this->basePath) {
+                $path = '/';
+            } elseif (str_starts_with($path, $this->basePath . '/')) {
+                $path = substr($path, strlen($this->basePath));
+            } else {
+                return false;
+            }
+        }
+
         $path = rtrim($path, '/');
 
         if ($path === '') {
@@ -61,9 +78,6 @@ final class Router
 
             return true;
         }
-
-        // http_response_code(404);
-        // echo 'Not Found';
 
         return false;
     }

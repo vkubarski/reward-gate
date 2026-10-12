@@ -15,7 +15,7 @@
 </head>
 <body>
 
-<form method="post" action="/admin/logout">
+<form method="post" action="<?= \RewardGate\Http\Url::to('/admin/logout') ?>">
     <input
         type="hidden"
         name="csrf_token"

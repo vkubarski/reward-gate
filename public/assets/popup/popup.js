@@ -143,7 +143,7 @@ class RewardGatePopup {
 
     async startUnlock() {
         const campaignResponse = await fetch(
-            `/campaigns/${this.campaignId}`
+            window.rewardGateUrl(`/campaigns/${this.campaignId}`)
         );
 
         const campaignData = await this.parseResponse(
@@ -178,7 +178,7 @@ class RewardGatePopup {
         );
 
         const response = await fetch(
-            `/unlock/${this.campaignId}/start`,
+            window.rewardGateUrl(`/unlock/${this.campaignId}/start`),
             {
                 method: 'POST',
                 headers: {
@@ -206,7 +206,7 @@ class RewardGatePopup {
 
     async checkStatus() {
         const response = await fetch(
-            `/unlock/${this.campaignId}/status`
+             window.rewardGateUrl(`/unlock/${this.campaignId}/status`)
         );
 
         const data = await this.parseResponse(
@@ -251,7 +251,7 @@ class RewardGatePopup {
 
     async completeUnlock() {
         const response = await fetch(
-            '/unlock/complete',
+            window.rewardGateUrl('/unlock/complete'),
             {
                 method: 'POST',
                 headers: {
@@ -308,7 +308,7 @@ class RewardGatePopup {
 
         try {
             const response = await fetch(
-                `/unlock/${this.campaignId}/start`,
+                window.rewardGateUrl(`/unlock/${this.campaignId}/start`),
                 {
                     method: 'POST',
                     headers: {

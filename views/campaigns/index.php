@@ -34,7 +34,8 @@ $buildSortUrl = static function (
         $query['search'] = $search;
     }
 
-    return '/admin/campaigns?'
+    return \RewardGate\Http\Url::to('/admin/campaigns')
+        . '?'
         . http_build_query($query);
 };
 
@@ -58,7 +59,8 @@ $buildPageUrl = static function (
         $query['search'] = $search;
     }
 
-    return '/admin/campaigns?'
+    return \RewardGate\Http\Url::to('/admin/campaigns')
+        . '?'
         . http_build_query($query);
 };
 ?>
@@ -77,7 +79,7 @@ $buildPageUrl = static function (
     <div class="d-flex flex-column flex-sm-row gap-2">
         <form
             method="get"
-            action="/admin/campaigns"
+            action="<?= \RewardGate\Http\Url::to('/admin/campaigns') ?>"
             class="d-flex"
         >
             <div class="input-group">
@@ -98,7 +100,7 @@ $buildPageUrl = static function (
 
                     <?php if ($search !== ''): ?>
                         <a
-                            href="/admin/campaigns"
+                            href="<?= \RewardGate\Http\Url::to('/admin/campaigns') ?>"
                             class="position-absolute top-50 end-0 translate-middle-y me-2 text-body-secondary text-decoration-none"
                             aria-label="Clear search"
                             title="Clear search"
@@ -155,7 +157,7 @@ $buildPageUrl = static function (
         </form>
 
         <a
-            href="/admin/campaigns/create"
+            href="<?= \RewardGate\Http\Url::to('/admin/campaigns/create') ?>"
             class="btn btn-primary"
         >
             + Create Campaign
@@ -291,7 +293,7 @@ $buildPageUrl = static function (
                     <tr>
                         <td>
                             <a
-                                href="/admin/campaigns/<?= (int)$campaign['id'] ?>"
+                                href="<?= \RewardGate\Http\Url::to('/admin/campaigns/' . (int)$campaign['id']) ?>"
                                 class="admin-campaign-link"
                             >
                                 <?= htmlspecialchars(
@@ -345,7 +347,7 @@ $buildPageUrl = static function (
 
                         <td class="text-end">
                             <a
-                                href="/admin/campaigns/<?= (int)$campaign['id'] ?>"
+                                href="<?= \RewardGate\Http\Url::to('/admin/campaigns/' . (int)$campaign['id']) ?>"
                                 class="admin-view-button btn btn-sm btn-outline-secondary"
                             >
                                 View

@@ -15,7 +15,7 @@ final class AdminAuthGuard
     {
         return function (array $params = []) use ($handler): void {
             if (!$this->adminSession->isAuthenticated()) {
-                header('Location: /admin/login');
+                header('Location: ' . \RewardGate\Http\Url::to('/admin/login'));
                 exit;
             }
 

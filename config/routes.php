@@ -97,7 +97,7 @@ return static function (Router $router) use ($pdo, $appConfig): void {
         '/admin',
         $adminAuthGuard->protect(
             static function(): void {
-                header('Location: /admin/campaigns');
+                header('Location: ' . \RewardGate\Http\Url::to('/admin/campaigns'));
                 exit;
             }
         )

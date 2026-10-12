@@ -7,13 +7,27 @@ use RewardGate\Http\Router;
 require_once __DIR__ . '/../bootstrap.php';
 $registerRoutes = require __DIR__ . '/../config/routes.php';
 
-$router = new Router();
+$router = new Router(
+    \RewardGate\Http\Url::basePath()
+);
 $registerRoutes($router);
 
+$requestUri = $_SERVER['REQUEST_URI'] ?? '/';
+
 $path = parse_url(
-    $_SERVER['REQUEST_URI'],
+    $requestUri,
     PHP_URL_PATH
 );
+
+$routePath = is_string($path)
+    ? \RewardGate\Http\Url::stripBasePath($path)
+    : null;
+
+if ($routePath === null) {
+    http_response_code(404);
+    echo 'Not Found';
+    exit;
+}
 
 $matched = $router->dispatch(
     $_SERVER['REQUEST_METHOD'],
@@ -22,13 +36,14 @@ $matched = $router->dispatch(
 
 if (
     !$matched
-    && is_string($path)
     && (
-        $path === '/admin'
-        || str_starts_with($path, '/admin/')
+        $routePath === '/admin'
+        || str_starts_with($routePath, '/admin/')
     )
 ) {
-    header('Location: /admin/');
+    header(
+        'Location: ' . \RewardGate\Http\Url::to('/admin/')
+    );
     exit;
 }
 

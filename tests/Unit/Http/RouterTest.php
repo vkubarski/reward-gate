@@ -105,4 +105,44 @@ final class RouterTest extends TestCase
         $this->assertFalse($called);
         $this->assertFalse($matched);
     }
+
+    public function testDispatchesRouteInsideSubdirectory(): void
+    {
+        $router = new Router('/demo');
+        $called = false;
+
+        $router->get(
+            '/admin/campaigns',
+            function (array $params) use (&$called): void {
+                $called = true;
+            }
+        );
+
+        $matched = $router->dispatch(
+            'GET',
+            '/demo/admin/campaigns'
+        );
+
+        $this->assertTrue($called);
+        $this->assertTrue($matched);
+    }
+
+    public function testRejectsRouteOutsideConfiguredSubdirectory(): void
+    {
+        $router = new Router('/demo');
+
+        $router->get(
+            '/admin/campaigns',
+            static function (array $params): void {
+            }
+        );
+
+        $this->assertFalse(
+            $router->dispatch('GET', '/admin/campaigns')
+        );
+
+        $this->assertFalse(
+            $router->dispatch('GET', '/demonstration/admin/campaigns')
+        );
+    }
 }

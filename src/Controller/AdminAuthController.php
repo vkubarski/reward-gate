@@ -21,7 +21,7 @@ final class AdminAuthController
     public function showLogin(): void
     {
         if ($this->adminSession->isAuthenticated()) {
-            header('Location: /admin/campaigns');
+            header('Location: ' . \RewardGate\Http\Url::to('/admin/campaigns'));
             exit;
         }
 
@@ -31,7 +31,7 @@ final class AdminAuthController
     public function login(): void
     {
         if ($this->adminSession->isAuthenticated()) {
-            header('Location: /admin/campaigns');
+            header('Location: ' . \RewardGate\Http\Url::to('/admin/campaigns'));
             exit;
         }
 
@@ -66,14 +66,14 @@ final class AdminAuthController
             (int)$adminUser['id']
         );
 
-        header('Location: /admin/campaigns');
+        header('Location: ' . \RewardGate\Http\Url::to('/admin/campaigns'));
         exit;
     }
 
     public function logout(): void
     {
         if (!$this->adminSession->isAuthenticated()) {
-            header('Location: /admin/login');
+            header('Location: ' . \RewardGate\Http\Url::to('/admin/login'));
             exit;
         }
 
@@ -90,7 +90,7 @@ final class AdminAuthController
 
         $this->adminSession->logout();
 
-        header('Location: /admin/login');
+        header('Location: ' . \RewardGate\Http\Url::to('/admin/login'));
         exit;
     }
 

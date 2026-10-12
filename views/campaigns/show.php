@@ -15,7 +15,7 @@
 
     <div class="d-flex flex-wrap gap-2">
         <a
-            href="/admin/campaigns/<?= (int)$campaign['id'] ?>/edit"
+            href="<?= \RewardGate\Http\Url::to('/admin/campaigns/' . (int)$campaign['id'] . '/edit') ?>"
             class="admin-action-button btn btn-primary"
         >
             Edit Campaign
@@ -24,7 +24,7 @@
         <?php if ($campaign['status'] === 'active'): ?>
             <form
                 method="post"
-                action="/admin/campaigns/<?= (int)$campaign['id'] ?>/pause"
+                action="<?= \RewardGate\Http\Url::to('/admin/campaigns/' . (int)$campaign['id'] . '/pause') ?>"
             >
                 <input
                     type="hidden"
@@ -46,7 +46,7 @@
         <?php elseif ($campaign['status'] === 'draft'): ?>
             <form
                 method="post"
-                action="/admin/campaigns/<?= (int)$campaign['id'] ?>/activate"
+                action="<?= \RewardGate\Http\Url::to('/admin/campaigns/' . (int)$campaign['id'] . '/activate') ?>"
             >
                 <input
                     type="hidden"
@@ -68,7 +68,7 @@
         <?php elseif ($campaign['status'] === 'paused'): ?>
             <form
                 method="post"
-                action="/admin/campaigns/<?= (int)$campaign['id'] ?>/activate"
+                action="<?= \RewardGate\Http\Url::to('/admin/campaigns/' . (int)$campaign['id'] . '/activate') ?>"
             >
                 <input
                     type="hidden"
@@ -92,7 +92,7 @@
         <?php if ($campaign['status'] !== 'archived'): ?>
             <form
                 method="post"
-                action="/admin/campaigns/<?= (int)$campaign['id'] ?>/archive"
+                action="<?= \RewardGate\Http\Url::to('/admin/campaigns/' . (int)$campaign['id'] . '/archive') ?>"
                 onsubmit="return confirm('Archive this campaign? You can no longer activate it after archiving.');"
             >
                 <input

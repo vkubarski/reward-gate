@@ -224,7 +224,9 @@ final class CampaignController
             return;
         }
 
-        header("Location: /admin/campaigns/{$id}");
+        header(
+            'Location: ' . \RewardGate\Http\Url::to("/admin/campaigns/{$id}")
+        );
         exit;
     }
 
@@ -336,7 +338,7 @@ final class CampaignController
         }
 
         header(
-            "Location: /admin/campaigns/{$campaignId}"
+            'Location: ' . \RewardGate\Http\Url::to("/admin/campaigns/{$campaignId}")
         );
 
         exit;
@@ -379,7 +381,7 @@ final class CampaignController
         }
 
         header(
-            "Location: /admin/campaigns/{$campaignId}"
+            'Location: ' . \RewardGate\Http\Url::to("/admin/campaigns/{$campaignId}")
         );
 
         exit;
@@ -422,7 +424,7 @@ final class CampaignController
         }
 
         header(
-            "Location: /admin/campaigns/{$campaignId}"
+            'Location: ' . \RewardGate\Http\Url::to("/admin/campaigns/{$campaignId}")
         );
 
         exit;
@@ -483,7 +485,7 @@ final class CampaignController
         }
 
         header(
-            "Location: /admin/campaigns/{$campaignId}"
+            'Location: ' . \RewardGate\Http\Url::to("/admin/campaigns/{$campaignId}")
         );
 
         exit;

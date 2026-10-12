@@ -3,7 +3,7 @@
 declare(strict_types=1);
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-base-path="<?= htmlspecialchars(\RewardGate\Http\Url::basePath(), ENT_QUOTES, 'UTF-8') ?>">
 <head>
     <meta charset="UTF-8">
     <meta
@@ -12,27 +12,27 @@ declare(strict_types=1);
     >
     <link
         rel="icon"
-        href="/assets/brand/favicon.svg"
+        href="<?= \RewardGate\Http\Url::to('/assets/brand/favicon.svg') ?>"
         type="image/svg+xml"
     >
 
     <link
         rel="icon"
-        href="/assets/brand/favicon-32.png"
+        href="<?= \RewardGate\Http\Url::to('/assets/brand/favicon-32.png') ?>"
         type="image/png"
         sizes="32x32"
     >
 
     <link
         rel="icon"
-        href="/assets/brand/favicon-16.png"
+        href="<?= \RewardGate\Http\Url::to('/assets/brand/favicon-16.png') ?>"
         type="image/png"
         sizes="16x16"
     >
 
     <link
         rel="apple-touch-icon"
-        href="/assets/brand/apple-touch-icon.png"
+        href="<?= \RewardGate\Http\Url::to('/assets/brand/apple-touch-icon.png') ?>"
     >
     <script>
         (() => {
@@ -61,7 +61,7 @@ declare(strict_types=1);
     >
 
     <link
-        href="/assets/css/admin.css"
+        href="<?= \RewardGate\Http\Url::to('/assets/css/admin.css') ?>"
         rel="stylesheet"
     >
 
