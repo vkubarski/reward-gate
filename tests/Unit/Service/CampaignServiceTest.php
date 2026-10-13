@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use RewardGate\Repository\CampaignRepositoryInterface;
 use RewardGate\Service\CampaignService;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 final class CampaignServiceTest extends TestCase
 {
@@ -804,11 +805,60 @@ final class CampaignServiceTest extends TestCase
         $this->assertTrue($result);
     }
 
-    public function testCreateRejectsPopupWithClickUnlock(): void
+    public function testCreateAcceptsPopupWithClickUnlock(): void
     {
         $campaignRepository = $this->createMock(
             CampaignRepositoryInterface::class
         );
+
+        $campaignRepository
+            ->expects($this->once())
+            ->method('create')
+            ->with(
+                'Test Campaign',
+                'popup',
+                [
+                    'title' => 'Unlock Content',
+                    'message' =>
+                        'Please wait while your content is being unlocked.',
+                    'show_message' => true,
+                    'content' => '',
+                    'destination_url' => 'https://example.com',
+                ],
+                'draft',
+                'click',
+                10,
+                'content',
+                null
+            )
+            ->willReturn(42);
+
+        $service = new CampaignService(
+            $campaignRepository
+        );
+
+        $result = $service->create(
+            'Test Campaign',
+            'popup',
+            [
+                'destination_url' => 'https://example.com',
+            ],
+            'draft',
+            'click'
+        );
+
+        $this->assertSame(42, $result);
+    }
+
+    public function testCreateRejectsPopupWithClickUnlockWithoutDestinationUrl(): void
+    {
+        $campaignRepository = $this->createMock(
+            CampaignRepositoryInterface::class
+        );
+
+        $campaignRepository
+            ->expects($this->never())
+            ->method('create');
 
         $service = new CampaignService(
             $campaignRepository
@@ -816,7 +866,7 @@ final class CampaignServiceTest extends TestCase
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage(
-            'Invalid presentation type and unlock method combination.'
+            'Destination URL is required for click unlock.'
         );
 
         $service->create(
@@ -1126,4 +1176,111 @@ final class CampaignServiceTest extends TestCase
         $this->assertSame($campaigns, $result['campaigns']);
     }
 
+    public static function invalidDestinationUrlProvider(): array
+    {
+        return [
+            'empty' => ['', 'Destination URL is required for click unlock.'],
+            'whitespace only' => ['   ', 'Destination URL is required for click unlock.'],
+            'javascript scheme' => ['javascript:alert(1)', 'Destination URL must use HTTP or HTTPS.'],
+            'data scheme' => ['data:text/plain,hello', 'Destination URL must use HTTP or HTTPS.'],
+            'ftp scheme' => ['ftp://example.com/file', 'Destination URL must use HTTP or HTTPS.'],
+            'protocol-relative' => ['//example.com/path', 'Destination URL must use HTTP or HTTPS.'],
+            'no scheme' => ['example.com/path', 'Destination URL must use HTTP or HTTPS.'],
+        ];
+    }
+
+    #[DataProvider('invalidDestinationUrlProvider')]
+    public function testCreateRejectsInvalidDestinationUrl(string $url, string $message): void
+    {
+        $campaignRepository = $this->createMock(CampaignRepositoryInterface::class);
+        $campaignRepository->expects($this->never())->method('create');
+
+        $service = new CampaignService($campaignRepository);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage($message);
+
+        $service->create(
+            'Test Campaign',
+            'content',
+            ['cta_label' => 'Continue', 'destination_url' => $url],
+            'draft',
+            'click'
+        );
+    }
+
+    public function testCreateTrimsAndAcceptsValidDestinationUrl(): void
+    {
+        $campaignRepository = $this->createMock(CampaignRepositoryInterface::class);
+        $campaignRepository
+            ->expects($this->once())
+            ->method('create')
+            ->with(
+                'Test Campaign',
+                'content',
+                [
+                    'cta_label' => 'Continue',
+                    'destination_url' => 'https://example.com/path?x=1',
+                ],
+                'draft',
+                'click',
+                10,
+                'content',
+                null
+            )
+            ->willReturn(7);
+
+        $service = new CampaignService($campaignRepository);
+
+        $result = $service->create(
+            'Test Campaign',
+            'content',
+            [
+                'cta_label' => 'Continue',
+                'destination_url' => '  https://example.com/path?x=1  ',
+            ],
+            'draft',
+            'click'
+        );
+
+        $this->assertSame(7, $result);
+    }
+
+    /**
+     * Expected to FAIL until the scheme is lowercased before the in_array check:
+     * URL schemes are case-insensitive, so HTTPS://... is a valid URL.
+     */
+    public function testCreateAcceptsUppercaseUrlScheme(): void
+    {
+        $campaignRepository = $this->createMock(CampaignRepositoryInterface::class);
+        $campaignRepository
+            ->expects($this->once())
+            ->method('create')
+            ->with(
+                'Test Campaign',
+                'content',
+                $this->anything(),
+                'draft',
+                'click',
+                10,
+                'content',
+                null
+            )
+            ->willReturn(7);
+
+        $service = new CampaignService($campaignRepository);
+
+        $result = $service->create(
+            'Test Campaign',
+            'content',
+            [
+                'cta_label' => 'Continue',
+                'destination_url' => 'HTTPS://EXAMPLE.COM/path',
+            ],
+            'draft',
+            'click'
+        );
+
+        $this->assertSame(7, $result);
+    }
 }

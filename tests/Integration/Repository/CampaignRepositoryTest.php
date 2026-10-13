@@ -443,4 +443,64 @@ final class CampaignRepositoryTest extends IntegrationTestCase
             $campaigns[1]['presentation_type']
         );
     }
+
+    public function testUpdateReturnsTrueWhenValuesAreUnchanged(): void
+    {
+        $repository = new CampaignRepository($this->pdo);
+
+        $id = $repository->create(
+            'Test Campaign',
+            'popup',
+            null,
+            'active'
+        );
+
+        $result = $repository->update(
+            $id,
+            ['status' => 'active']
+        );
+
+        $this->assertTrue($result);
+    }
+
+    public function testCountAllMatchesFindAllForSearchAndExcludesArchived(): void
+    {
+        $repository = new CampaignRepository($this->pdo);
+
+        $visibleId = $repository->create(
+            'Zz Count Test Visible',
+            'popup'
+        );
+
+        $repository->create(
+            'Zz Count Test Archived',
+            'popup',
+            null,
+            'archived'
+        );
+
+        $repository->create(
+            'Unrelated Campaign',
+            'popup'
+        );
+
+        $count = $repository->countAll('Zz Count Test');
+
+        $campaigns = $repository->findAll(
+            'id',
+            'ASC',
+            10,
+            0,
+            'Zz Count Test'
+        );
+
+        $this->assertSame(1, $count);
+        $this->assertSame(
+            [$visibleId],
+            array_map(
+                'intval',
+                array_column($campaigns, 'id')
+            )
+        );
+    }
 }

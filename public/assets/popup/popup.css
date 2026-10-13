@@ -28,6 +28,16 @@
     text-align: center;
 }
 
+.reward-gate__dialog--clickable {
+    cursor: pointer;
+
+    transition: box-shadow 0.2s ease;
+}
+
+.reward-gate__dialog--clickable:hover {
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
 .reward-gate__timer {
     margin: 20px 0;
 
@@ -119,9 +129,4 @@
 
         font-size: 1.75rem;
     }
-}
-
-.reward-gate__retry:focus-visible {
-    outline: 3px solid #93c5fd;
-    outline-offset: 3px;
 }

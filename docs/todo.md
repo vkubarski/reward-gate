@@ -1,6 +1,6 @@
 # Reward Gate — Development TODO
 
-**Status:** MVP Development
+**Status:** MVP Complete; Production Readiness In Progress
 **Related Documents:** `docs/specification.md`, `docs/architecture.md`, `docs/database.md`, `docs/E2E.md`
 
 This document is the active implementation checklist for Reward Gate.
@@ -11,7 +11,7 @@ The architecture defines how the application should be structured.
 
 The database document defines how persistent data should be modeled.
 
-This document tracks implementation progress and the remaining work required to reach the MVP.
+This document tracks implementation progress and the remaining work required for production readiness and commercial release.
 
 ---
 
@@ -160,7 +160,7 @@ This document tracks implementation progress and the remaining work required to 
 - [x] Test database connection locally
 - [x] Test database connection on demo server
 
-### 3.4 Presentation
+### 3.4 Presentation and Branding
 
 - [x] Establish Controller → View architecture
 - [x] Establish shared `layout.php`
@@ -173,8 +173,9 @@ This document tracks implementation progress and the remaining work required to 
 - [x] Establish responsive admin navigation
 - [x] Establish admin theme selection with system/light/dark modes
 - [x] Refine admin UI visual theme
-- [x] Add Reward Gate logo assets
-- [x] Add favicon assets and integrate favicon references into admin/auth layouts
+- [x] Create and integrate Reward Gate logo assets
+- [x] Create and integrate favicon assets
+- [x] Verify branding and admin UI on the remote demo server
 
 ---
 
@@ -214,7 +215,7 @@ This document tracks implementation progress and the remaining work required to 
 - [x] Export schema/data for demo deployment
 - [x] Deploy database to demo server
 - [x] Verify session/completion lifecycle locally
-- [ ] Verify session/completion lifecycle remotely
+- [x] Verify session/completion lifecycle remotely
 - [ ] Verify migration rollback behavior where supported
 
 ---
@@ -356,6 +357,7 @@ The MVP reward is simply:
 - [x] Add Reward Gate logo assets
 - [x] Add favicon assets and integrate them into admin/auth layouts
 - [x] Improve campaign-list presentation and interactions
+- [x] Verify admin UI on the remote demo server
 
 A dashboard is not required for the MVP.
 
@@ -398,15 +400,17 @@ A dashboard is not required for the MVP.
 
 ### 7.3 UX
 
-- [ ] Explain required action clearly
+- [x] Explain the required action clearly
 - [x] Display clear countdown/progress
-- [ ] Display completion state
+- [x] Display completion state
 - [x] Display failure state
-- [ ] Display dedicated expired state
+- [x] Display dedicated expired state
 - [x] Avoid deceptive UI
 - [x] Test desktop locally
 - [x] Test mobile locally
-- [ ] Perform final UX review
+- [x] Test desktop remotely
+- [x] Test mobile remotely
+- [x] Perform final MVP UX review
 
 ---
 
@@ -487,6 +491,9 @@ server-side service.
 - [x] Verify mobile behavior locally
 - [x] Verify click completion cannot directly grant unlock without server verification
 - [x] Verify replay/frequency rules match Popup Gate behavior
+- [x] Verify desktop behavior remotely
+- [x] Verify mobile behavior remotely
+- [x] Verify no unexpected browser-console errors remotely
 
 ---
 
@@ -591,21 +598,24 @@ that it is necessary.
 - [x] Verify PHP execution
 - [x] Verify front-controller routing
 - [x] Verify campaign routes
+- [x] Verify admin routes
+- [x] Verify visitor/demo routes
 - [x] Verify HTTPS
+- [x] Verify the current application version is running
 - [x] Protect internal application files
-- [ ] Deploy the latest committed application changes
-- [ ] Verify the new branding and admin UI remotely
-- [ ] Test the complete Popup Gate workflow remotely
-- [ ] Test the complete Content Gate workflow remotely
-- [ ] Verify session/completion lifecycle remotely
-- [ ] Test expired sessions
-- [ ] Test replay attempts
-- [ ] Test manipulated timer
-- [ ] Test multiple completion attempts
-- [ ] Test frequency-limit behavior remotely
-- [ ] Test the complete visitor workflow on mobile
-- [ ] Verify no unexpected browser-console errors
-- [ ] Verify `tools/check-database-timezone.php` is not publicly accessible
+- [x] Deploy the latest required application changes
+- [x] Verify the new branding and admin UI remotely
+- [x] Test the complete Popup Gate workflow remotely
+- [x] Test the complete Content Gate workflow remotely
+- [x] Verify session/completion lifecycle remotely
+- [x] Test expired sessions
+- [x] Test replay attempts
+- [x] Test manipulated timer
+- [x] Test multiple completion attempts
+- [x] Test frequency-limit behavior remotely
+- [x] Test the complete visitor workflow on mobile
+- [x] Verify no unexpected browser-console errors
+- [x] Verify `tools/check-database-timezone.php` is not publicly accessible
 
 ### 10.3 Nginx
 
@@ -692,7 +702,7 @@ Current verified baseline:
 - [x] Popup error handling tested
 - [x] Complete Content Gate browser/E2E happy path
 - [x] Create repeatable manual browser/E2E test procedure in `docs/E2E.md`
-- [ ] Run the complete browser/E2E procedure against the remote demo server
+- [x] Run the complete browser/E2E procedure against the remote demo server
 
 ---
 
@@ -723,22 +733,23 @@ Current verified baseline:
 - [x] Deploy application
 - [x] Deploy database
 - [x] Verify HTTPS
-- [ ] Deploy the latest committed application changes
-- [ ] Verify the current application version is running
-- [ ] Test Popup Gate
-- [ ] Test Content Gate
-- [ ] Test expired sessions
-- [ ] Test replay attempts
-- [ ] Test manipulated timer
-- [ ] Test multiple completion attempts
-- [ ] Test frequency limits
-- [ ] Test mobile devices
+- [x] Deploy the latest required application changes
+- [x] Verify the current application version is running
+- [x] Test Popup Gate
+- [x] Test Content Gate
+- [x] Test expired sessions
+- [x] Test replay attempts
+- [x] Test manipulated timer
+- [x] Test multiple completion attempts
+- [x] Test frequency limits
+- [x] Test mobile devices
+- [x] Verify browser-console behavior
 
 ---
 
 ## 13. First Commercial Release
 
-These features remain intentionally deferred until the MVP is working.
+These features remain intentionally deferred until the MVP is working and the commercial model has been validated.
 
 ### 13.1 Campaign Features
 
@@ -885,7 +896,7 @@ Licensing should not be implemented until the commercial model has been validate
 
 Before commercial release:
 
-- [ ] All MVP functionality complete
+- [x] All planned MVP functionality implemented
 - [ ] Security review complete
 - [x] Automated tests passing
 - [ ] PHPStan passing
@@ -896,77 +907,70 @@ Before commercial release:
 - [x] Apache deployment tested
 - [ ] Nginx deployment tested
 - [x] Shared-hosting deployment established
-- [ ] Latest application changes deployed and verified remotely
-- [ ] Complete remote visitor workflow tested
+- [x] Latest required application changes deployed and verified remotely
+- [x] Complete remote visitor workflows tested
 - [x] Local mobile testing complete
-- [ ] Remote mobile testing complete
+- [x] Remote mobile testing complete
 - [ ] Documentation reviewed and complete
 - [ ] Production configuration reviewed
-- [ ] Secrets excluded from distribution
-- [ ] Development dependencies excluded from production package
+- [x] Development credentials excluded from the demo deployment package
+- [ ] Development dependencies excluded from the production release package
 - [ ] Release archive tested on a clean server
 
 ---
 
 ## 18. Current Priority
 
-The core backend, Campaign Management, Popup Gate, unlock engine, visitor identification,
-frequency limiting, Content Gate, admin UI, branding, and reproducible local demo setup
-are substantially implemented.
+The Reward Gate MVP is implemented, branded, deployed to a remote demo server, and verified through local automated tests and manual browser testing.
 
 The current automated test baseline is **181 tests and 851 assertions**.
 
-The next milestone is to deploy the latest committed changes to the demo server and
-verify the complete visitor workflows remotely.
+The local and remote demo environments support both Popup Gate with timer unlock and Content Gate with click unlock. Remote testing has confirmed the principal visitor workflows, session behavior, replay rejection, expiration handling, frequency limits, mobile behavior, and browser-console behavior.
+
+The next milestone is **production readiness and commercial packaging**, not further MVP feature development.
 
 ### Current order
 
-1. **Deploy the latest committed changes**
-   - Preserve remote database configuration and existing data
-   - Verify deployment paths and file permissions
-   - Confirm the new branding and admin UI load correctly
-   - Ensure the development timezone diagnostic tool is not publicly accessible
-
-2. **Run the remote E2E procedure**
-   - Popup Gate and timer unlock
-   - Content Gate and click unlock
-   - Expired sessions
-   - Replay attempts
-   - Frequency limits
-   - Manipulated timer
-   - Multiple completion attempts
-   - Desktop and mobile behavior
-   - Browser console errors
-
-3. **Complete remaining Popup Gate UX**
-   - Explain the required action clearly
-   - Display a completion state
-   - Add a dedicated expired state
-   - Perform final UX review
-
-4. **Complete remaining Content Gate verification**
-   - Verify incorrect gate placement safely
-   - Document the client-side visibility/security boundary clearly
-
-5. **Complete production security and privacy review**
+1. **Complete the production security and privacy review**
    - Review production configuration
-   - Review trusted executable popup content
+   - Review trusted executable popup content and its security implications
    - Review visitor identification and privacy behavior
-   - Record verification failures where useful
+   - Document the Content Gate security boundary clearly
+   - Decide whether verification failures should be recorded
 
-6. **Finalize PHPStan and PHP-CS-Fixer**
+2. **Finalize PHPStan and PHP-CS-Fixer**
    - Address existing PHPStan findings
    - Verify formatting across the complete codebase
-   - Test supported PHP versions
+   - Establish the final coding standard
 
-7. **Verify migration rollback behavior where supported**
+3. **Confirm compatibility**
+   - Confirm the supported PHP version range
+   - Test against supported PHP versions
+   - Verify database compatibility where practical
 
-8. **Implement and test Nginx deployment**
+4. **Review database operations**
+   - Verify migration rollback behavior where supported
+   - Decide whether campaign hard-delete is required
+   - Review remaining campaign lifecycle edge cases
 
-9. **Finalize release documentation and commercial packaging**
+5. **Implement and test Nginx deployment**
+   - Configure PHP-FPM and front-controller routing
+   - Verify static assets, existing files, trailing-slash routes, and 404 handling
+   - Document deployment requirements
+
+6. **Finalize commercial packaging**
+   - Define release package contents
+   - Exclude development dependencies and sensitive files
+   - Prepare installation and upgrade documentation
+   - Test a clean installation and upgrade process
+
+7. **Prepare the commercial release**
+   - Complete the release checklist
+   - Review documentation
+   - Verify the release archive on a clean server
 
 Do not start advanced analytics, optimization, integrations, licensing, or SaaS work
-until the MVP visitor workflow is stable and has been verified on the remote server.
+until the production-readiness requirements and commercial priorities have been reviewed.
 
 ---
 

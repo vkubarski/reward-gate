@@ -164,22 +164,22 @@ Run the complete procedure above against the remote demo server.
 
 ### Remote Environment
 
-* [ ] HTTPS works correctly
-* [ ] Campaign routes work
-* [ ] Admin routes work
-* [ ] Visitor/demo routes work
-* [ ] Database connection works
-* [ ] Sessions work correctly
-* [ ] Cookies work correctly
-* [ ] Popup Gate workflow works
-* [ ] Content Gate workflow works
-* [ ] Timer verification works
-* [ ] Click unlock works
-* [ ] Replay protection works
-* [ ] Frequency limits work
-* [ ] Expired sessions are rejected
-* [ ] Mobile browser workflow works
-* [ ] No unexpected browser-console errors
+* [x] HTTPS works correctly
+* [x] Campaign routes work
+* [x] Admin routes work
+* [x] Visitor/demo routes work
+* [x] Database connection works
+* [x] Sessions work correctly
+* [x] Cookies work correctly
+* [x] Popup Gate workflow works
+* [x] Content Gate workflow works
+* [x] Timer verification works
+* [x] Click unlock works
+* [x] Replay protection works
+* [x] Frequency limits work
+* [x] Expired sessions are rejected
+* [x] Mobile browser workflow works
+* [x] No unexpected browser-console errors
 
 ---
 

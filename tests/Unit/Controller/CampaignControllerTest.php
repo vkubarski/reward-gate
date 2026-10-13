@@ -545,15 +545,20 @@ final class CampaignControllerTest extends TestCase
         );
     }
 
-    public function testStoreRejectsPopupWithClickUnlockMethod(): void
+    public function testStoreRejectsPopupWithClickUnlockWithoutDestinationUrl(): void
     {
         $campaignService = $this->createMock(
             CampaignServiceInterface::class
         );
 
         $campaignService
-            ->expects($this->never())
-            ->method('create');
+            ->expects($this->once())
+            ->method('create')
+            ->willThrowException(
+                new \InvalidArgumentException(
+                    'Destination URL is required for click unlock.'
+                )
+            );
 
         $csrfToken = $this->createMock(
             CsrfTokenInterface::class
@@ -590,7 +595,7 @@ final class CampaignControllerTest extends TestCase
 
         $this->assertIsString($output);
         $this->assertStringContainsString(
-            'This presentation type and unlock method combination is not supported.',
+            'Destination URL is required for click unlock.',
             $output
         );
     }
@@ -734,15 +739,20 @@ final class CampaignControllerTest extends TestCase
         );
     }
 
-    public function testStoreRejectsPopupClickCombination(): void
+    public function testStoreRejectsPopupClickCombinationWithoutDestinationUrl(): void
     {
         $campaignService = $this->createMock(
             CampaignServiceInterface::class
         );
 
         $campaignService
-            ->expects($this->never())
-            ->method('create');
+            ->expects($this->once())
+            ->method('create')
+            ->willThrowException(
+                new \InvalidArgumentException(
+                    'Destination URL is required for click unlock.'
+                )
+            );
 
         $csrfToken = $this->createMock(
             CsrfTokenInterface::class
@@ -779,7 +789,7 @@ final class CampaignControllerTest extends TestCase
 
         $this->assertIsString($output);
         $this->assertStringContainsString(
-            'This presentation type and unlock method combination is not supported.',
+            'Destination URL is required for click unlock.',
             $output
         );
     }
@@ -950,5 +960,64 @@ final class CampaignControllerTest extends TestCase
         } finally {
             $_GET = [];
         }
+    }
+
+    public static function stateChangingActionProvider(): array
+    {
+        return [
+            'update' => ['update', ['id' => '42']],
+            'activate' => ['activate', ['id' => '42']],
+            'pause' => ['pause', ['id' => '42']],
+            'archive' => ['archive', ['id' => '42']],
+        ];
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('stateChangingActionProvider')]
+    public function testStateChangingActionsRejectInvalidCsrfToken(
+        string $action,
+        array $params
+    ): void {
+        $campaignService = $this->createMock(
+            CampaignServiceInterface::class
+        );
+
+        $campaignService
+            ->expects($this->never())
+            ->method('create');
+
+        $campaignService
+            ->expects($this->never())
+            ->method('update');
+
+        $campaignService
+            ->expects($this->never())
+            ->method('findById');
+
+        $csrfToken = $this->createMock(
+            CsrfTokenInterface::class
+        );
+
+        $csrfToken
+            ->expects($this->once())
+            ->method('validate')
+            ->with(null)
+            ->willReturn(false);
+
+        $_POST = [];
+
+        $controller = $this->createController(
+            $campaignService,
+            $csrfToken
+        );
+
+        $response = $this->captureResponse(
+            fn () => $controller->$action($params)
+        );
+
+        $this->assertSame(403, $response['status']);
+        $this->assertSame(
+            'Invalid CSRF token',
+            $response['body']
+        );
     }
 }

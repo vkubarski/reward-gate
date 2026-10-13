@@ -169,7 +169,7 @@ final class CampaignController
         if (
             !(
                 ($presentationType === 'popup'
-                    && $unlockMethod === 'timer')
+                    && in_array($unlockMethod, ['timer', 'click'], true))
                 || (
                     $presentationType === 'content'
                     && $unlockMethod === 'click'
@@ -285,7 +285,7 @@ final class CampaignController
         if (
             !(
                 ($presentationType === 'popup'
-                    && $unlockMethod === 'timer')
+                    && in_array($unlockMethod, ['timer', 'click'], true))
                 || (
                     $presentationType === 'content'
                     && $unlockMethod === 'click'

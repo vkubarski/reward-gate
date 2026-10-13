@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-$form_action = '/admin/campaigns';
+$form_action = \RewardGate\Http\Url::to('/admin/campaigns');
 $submit_label = 'Create Campaign';
-$cancel_url = '/admin/campaigns';
+$cancel_url = \RewardGate\Http\Url::to('/admin/campaigns');
 ?>
 
 <div class="admin-page-header">

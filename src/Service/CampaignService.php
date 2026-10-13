@@ -261,7 +261,11 @@ final class CampaignService implements CampaignServiceInterface
         string $unlockMethod,
     ): void {
         if (
-            ($presentationType === 'popup' && $unlockMethod !== 'timer')
+            ($presentationType === 'popup' && !in_array(
+                $unlockMethod,
+                ['timer', 'click'],
+                true
+            ))
             || ($presentationType === 'content' && $unlockMethod !== 'click')
         ) {
             throw new InvalidArgumentException(
@@ -278,7 +282,7 @@ final class CampaignService implements CampaignServiceInterface
         $settings ??= [];
 
         if ($presentationType === 'popup') {
-            return [
+            $popupSettings = [
                 'title' => isset($settings['title'])
                     && is_string($settings['title'])
                     ? $settings['title']
@@ -299,6 +303,19 @@ final class CampaignService implements CampaignServiceInterface
                     ? $settings['content']
                     : self::POPUP_DEFAULT_SETTINGS['content'],
             ];
+
+            if ($unlockMethod === 'click') {
+                $destinationUrl = isset($settings['destination_url'])
+                    && is_string($settings['destination_url'])
+                    ? trim($settings['destination_url'])
+                    : '';
+
+                $this->assertValidDestinationUrl($destinationUrl);
+
+                $popupSettings['destination_url'] = $destinationUrl;
+            }
+
+            return $popupSettings;
         }
 
         if (
@@ -377,7 +394,11 @@ final class CampaignService implements CampaignServiceInterface
 
         $scheme = parse_url($url, PHP_URL_SCHEME);
 
-        if (!in_array($scheme, ['http', 'https'], true)) {
+
+        if (
+            !is_string($scheme)
+            || !in_array(strtolower($scheme), ['http', 'https'], true)
+        ) {
             throw new InvalidArgumentException(
                 'Destination URL must use HTTP or HTTPS.'
             );

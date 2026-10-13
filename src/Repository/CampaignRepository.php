@@ -236,6 +236,18 @@ final class CampaignRepository implements CampaignRepositoryInterface
 
         $statement->execute($parameters);
 
-        return $statement->rowCount() > 0;
+        if ($statement->rowCount() > 0) {
+            return true;
+        }
+
+        $statement = $this->pdo->prepare(
+            'SELECT 1 FROM campaigns WHERE id = :id'
+        );
+
+        $statement->execute([
+            'id' => $id,
+        ]);
+
+        return $statement->fetchColumn() !== false;
     }
 }

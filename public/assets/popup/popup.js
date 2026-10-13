@@ -7,6 +7,8 @@ class RewardGatePopup {
         this.timer = null;
         this.token = null;
         this.remainingSeconds = 0;
+        this.unlocking = false;
+        this.destinationUrl = null;
     }
 
     async init() {
@@ -159,7 +161,7 @@ class RewardGatePopup {
             );
         }
 
-        if (campaign.unlock_method !== 'timer') {
+        if (!['timer', 'click'].includes(campaign.unlock_method)) {
             throw new Error(
                 'Unsupported unlock method.'
             );
@@ -176,6 +178,34 @@ class RewardGatePopup {
         this.createGate(
             campaign.presentation_settings
         );
+
+        if (campaign.unlock_method === 'click') {
+            this.destinationUrl =
+                campaign.presentation_settings.destination_url;
+
+            if (!this.destinationUrl) {
+                throw new Error(
+                    'Destination URL is missing.'
+                );
+            }
+
+            this.timerElement.hidden = true;
+
+            const dialog = this.gate.querySelector(
+                '.reward-gate__dialog'
+            );
+
+            dialog.classList.add(
+                'reward-gate__dialog--clickable'
+            );
+
+            dialog.addEventListener(
+                'click',
+                () => this.handleClickUnlock()
+            );
+
+            return;
+        }
 
         const response = await fetch(
             window.rewardGateUrl(`/unlock/${this.campaignId}/start`),
@@ -202,6 +232,47 @@ class RewardGatePopup {
             () => this.tick(),
             1000
         );
+    }
+
+    async handleClickUnlock() {
+        if (this.unlocking) {
+            return;
+        }
+
+        this.unlocking = true;
+
+        // Open the destination directly inside the click event.
+        // This avoids most browser popup-blocker issues.
+        window.open(
+            this.destinationUrl,
+            '_blank',
+            'noopener,noreferrer'
+        );
+
+        try {
+            const response = await fetch(
+                window.rewardGateUrl(`/unlock/${this.campaignId}/start`),
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
+            const data = await this.parseResponse(
+                response,
+                'Unable to start unlock.'
+            );
+
+            this.token = data.session.token;
+
+            await this.completeUnlock();
+        } catch (error) {
+            this.unlocking = false;
+
+            this.showError(error.message);
+        }
     }
 
     async checkStatus() {

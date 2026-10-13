@@ -163,17 +163,23 @@ declare(strict_types=1);
     <div
         class="mb-4"
         data-unlock-settings="click"
-        <?= (
-            ($old['presentation_type'] ?? 'popup') !== 'content'
-            || ($old['unlock_method'] ?? 'timer') !== 'click'
-        ) ? 'hidden' : '' ?>
+        <?= ($old['unlock_method'] ?? 'timer') !== 'click'
+            ? 'hidden'
+            : '' ?>
     >
         <div class="admin-form-section">
             <h2 class="h5 mb-3">
-                Content Gate Settings
+                Click Unlock Settings
             </h2>
         </div>
-        <div class="mb-3">
+
+        <div
+            class="mb-3"
+            data-click-setting="content"
+            <?= ($old['presentation_type'] ?? 'popup') !== 'content'
+                ? 'hidden'
+                : '' ?>
+        >
             <label
                 for="content_cta_label"
                 class="form-label"
@@ -215,10 +221,18 @@ declare(strict_types=1);
                     'UTF-8'
                 ) ?>"
                 placeholder="https://example.com/"
+                required
+                <?= ($old['unlock_method'] ?? 'timer') !== 'click'
+                    ? 'disabled'
+                    : '' ?>
             >
 
             <div class="form-text">
-                The page opened when the visitor clicks the CTA.
+                <?php if (($old['presentation_type'] ?? 'popup') === 'popup'): ?>
+                    The page opened in a new tab when the visitor clicks the popup.
+                <?php else: ?>
+                    The page opened when the visitor clicks the CTA.
+                <?php endif; ?>
             </div>
         </div>
     </div>
