@@ -47,6 +47,7 @@ CREATE TABLE unlock_sessions (
         INDEX idx_unlock_sessions_status_expires_at (status, expires_at),
         INDEX idx_unlock_sessions_visitor_campaign
                 (visitor_id, campaign_id, created_at),
+        INDEX idx_unlock_sessions_campaign_started (campaign_id, started_at),
 
         CONSTRAINT fk_unlock_sessions_campaign
                 FOREIGN KEY (campaign_id)
@@ -99,6 +100,32 @@ CREATE TABLE admin_users (
 
         PRIMARY KEY (id),
         UNIQUE INDEX uq_admin_users_username (username)
+) ENGINE=InnoDB
+  DEFAULT CHARACTER SET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE gate_impressions (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    campaign_id BIGINT UNSIGNED NOT NULL,
+    visitor_id CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+    page_view_id CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+    presentation_type VARCHAR(32) NOT NULL,
+    unlock_method VARCHAR(32) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id),
+
+    UNIQUE INDEX uq_gate_impressions_page_view
+        (campaign_id, visitor_id, page_view_id),
+
+    INDEX idx_gate_impressions_campaign_created
+        (campaign_id, created_at),
+
+    CONSTRAINT fk_gate_impressions_campaign
+        FOREIGN KEY (campaign_id)
+        REFERENCES campaigns (id)
+        ON DELETE RESTRICT
 ) ENGINE=InnoDB
   DEFAULT CHARACTER SET=utf8mb4
   COLLATE=utf8mb4_unicode_ci;

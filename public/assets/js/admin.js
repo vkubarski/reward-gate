@@ -242,6 +242,17 @@
                 section.hidden = !matchesUnlockMethod;
             });
 
+            const timerDuration = document.querySelector(
+                '#timer_duration_seconds'
+            );
+
+            if (timerDuration) {
+                const timerUnlock = unlockMethod.value === 'timer';
+
+                timerDuration.required = timerUnlock;
+                timerDuration.disabled = !timerUnlock;
+            }
+
             document.querySelectorAll('[data-click-setting]').forEach(
                 (setting) => {
                     setting.hidden =

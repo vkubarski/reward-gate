@@ -7,16 +7,19 @@ namespace RewardGate\Controller;
 use InvalidArgumentException;
 use RewardGate\Security\CsrfTokenInterface;
 use RewardGate\Service\CampaignServiceInterface;
+use DateTimeImmutable;
+use DateTimeZone;
+use RewardGate\Service\CampaignAnalyticsServiceInterface;
 
 final class CampaignController
 {
     public function __construct(
         private CampaignServiceInterface $campaignService,
         private CsrfTokenInterface $csrfToken,
-        private int $campaignsPerPage
+        private int $campaignsPerPage,
+        private CampaignAnalyticsServiceInterface $campaignAnalyticsService,
     ) {
     }
-
     public function index(): void
     {
         $page = max(
@@ -63,9 +66,18 @@ final class CampaignController
             return;
         }
 
+        $analytics = $this->campaignAnalyticsService->getReport(
+            (int)$campaign['id'],
+            new DateTimeImmutable(
+                'now',
+                new DateTimeZone('UTC')
+            ),
+        );
+
         $this->render('campaigns/show', [
             'title' => $campaign['name'],
             'campaign' => $campaign,
+            'analytics' => $analytics,
         ]);
     }
 

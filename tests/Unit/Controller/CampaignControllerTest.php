@@ -10,14 +10,26 @@ use RewardGate\Controller\CampaignController;
 use RewardGate\Security\CsrfTokenInterface;
 use RewardGate\Service\CampaignServiceInterface;
 use Throwable;
+use RewardGate\Service\CampaignAnalyticsServiceInterface;
 
 final class CampaignControllerTest extends TestCase
 {
-    private function createController(CampaignServiceInterface $campaignService, CsrfTokenInterface $csrfToken): CampaignController
-    {
-        return new CampaignController($campaignService, $csrfToken, 20);
-    }
+    private function createController(
+        CampaignServiceInterface $campaignService,
+        CsrfTokenInterface $csrfToken,
+        ?CampaignAnalyticsServiceInterface $campaignAnalyticsService = null
+    ): CampaignController {
+        $campaignAnalyticsService ??= $this->createMock(
+            CampaignAnalyticsServiceInterface::class
+        );
 
+        return new CampaignController(
+            $campaignService,
+            $csrfToken,
+            20,
+            $campaignAnalyticsService,
+        );
+    }
     private function captureResponse(callable $callback): array
     {
         http_response_code(200);
@@ -1017,6 +1029,106 @@ final class CampaignControllerTest extends TestCase
         $this->assertSame(403, $response['status']);
         $this->assertSame(
             'Invalid CSRF token',
+            $response['body']
+        );
+    }
+
+    public function testShowDisplaysCampaignAndAnalytics(): void
+    {
+        $campaign = [
+            'id' => 42,
+            'name' => 'Analytics Campaign',
+            'status' => 'active',
+            'presentation_type' => 'popup',
+            'unlock_method' => 'timer',
+            'timer_duration_seconds' => 30,
+        ];
+
+        $campaignService = $this->createMock(
+            CampaignServiceInterface::class
+        );
+
+        $campaignService
+            ->expects($this->once())
+            ->method('findById')
+            ->with(42)
+            ->willReturn($campaign);
+
+        $analytics = [
+            '7_days' => [
+                'start' => '2026-10-11 00:00:00',
+                'end' => '2026-10-18 00:00:00',
+                'shown' => 100,
+                'sessions' => 40,
+                'completed' => 25,
+                'timer_sessions' => 30,
+                'timer_completed' => 20,
+                'unlock_rate' => 25.0,
+                'timer_finished_wait_rate' => 66.7,
+            ],
+            '30_days' => [
+                'start' => '2026-09-18 00:00:00',
+                'end' => '2026-10-18 00:00:00',
+                'shown' => 500,
+                'sessions' => 200,
+                'completed' => 120,
+                'timer_sessions' => 150,
+                'timer_completed' => 100,
+                'unlock_rate' => 24.0,
+                'timer_finished_wait_rate' => 66.7,
+            ],
+        ];
+
+        $analyticsService = $this->createMock(
+            CampaignAnalyticsServiceInterface::class
+        );
+
+        $analyticsService
+            ->expects($this->once())
+            ->method('getReport')
+            ->with(
+                42,
+                $this->callback(
+                    static fn ($referenceTime): bool =>
+                        $referenceTime instanceof \DateTimeImmutable
+                        && $referenceTime->getTimezone()->getName() === 'UTC'
+                )
+            )
+            ->willReturn($analytics);
+
+        $csrfToken = $this->createStub(
+            CsrfTokenInterface::class
+        );
+
+        $controller = $this->createController(
+            $campaignService,
+            $csrfToken,
+            $analyticsService
+        );
+
+        $response = $this->captureResponse(
+            fn () => $controller->show(['id' => '42'])
+        );
+
+        $this->assertSame(200, $response['status']);
+        $this->assertStringContainsString(
+            'Analytics Campaign',
+            $response['body']
+        );
+        $this->assertStringContainsString(
+            'Last 7 days',
+            $response['body']
+        );
+        $this->assertStringContainsString(
+            'Last 30 days',
+            $response['body']
+        );
+        $this->assertStringContainsString(
+            'Timer Finished wait rate',
+            $response['body']
+        );
+        $this->assertStringContainsString(
+            '66.7%',
             $response['body']
         );
     }

@@ -48,6 +48,7 @@
 </main>
 
 <script src="<?= \RewardGate\Http\Url::to('/assets/js/url.js') ?>"></script>
+<script src="<?= \RewardGate\Http\Url::to('/assets/js/activity.js') ?>"></script>
 <script src="<?= \RewardGate\Http\Url::to('/assets/popup/popup.js') ?>"></script>
 
 </body>

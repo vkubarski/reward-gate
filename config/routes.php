@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+use RewardGate\Repository\CampaignAnalyticsRepository;
+use RewardGate\Service\CampaignAnalyticsService;
+use RewardGate\Controller\ActivityController;
+use RewardGate\Repository\GateImpressionRepository;
 use RewardGate\Auth\AdminAuthGuard;
 use RewardGate\Auth\AdminSession;
 use RewardGate\Controller\AdminAuthController;
@@ -22,6 +26,11 @@ use RewardGate\Security\VisitorId;
 return static function (Router $router) use ($pdo, $appConfig): void {
     $campaignRepository = new CampaignRepository($pdo);
     $campaignService = new CampaignService($campaignRepository);
+
+    $campaignAnalyticsRepository = new CampaignAnalyticsRepository($pdo);
+    $campaignAnalyticsService = new CampaignAnalyticsService(
+        $campaignAnalyticsRepository
+    );
 
     // For demo campaigns
     $findDemoCampaignId = static function (
@@ -57,7 +66,8 @@ return static function (Router $router) use ($pdo, $appConfig): void {
     $campaignController = new CampaignController(
         $campaignService,
         $csrfToken,
-        $appConfig['admin']['campaigns_per_page']
+        $appConfig['admin']['campaigns_per_page'],
+        $campaignAnalyticsService,
     );
 
     $unlockSessionRepository = new UnlockSessionRepository($pdo);
@@ -92,6 +102,14 @@ return static function (Router $router) use ($pdo, $appConfig): void {
     );
 
     $adminAuthGuard = new AdminAuthGuard($adminSession);
+
+    $gateImpressionRepository = new GateImpressionRepository($pdo);
+
+    $activityController = new ActivityController(
+        $campaignService,
+        $gateImpressionRepository,
+        $visitorId,
+    );
 
     $router->get(
         '/admin',
@@ -246,4 +264,6 @@ return static function (Router $router) use ($pdo, $appConfig): void {
         '/unlock/complete',
         [$unlockController, 'complete']
     );
+
+    $router->post('/activity/{id}', [$activityController, 'record']);
 };

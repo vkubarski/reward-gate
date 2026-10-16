@@ -29,6 +29,10 @@ class RewardGateContent {
             this.createGate(
                 campaign.presentation_settings
             );
+
+            window.rewardGateRecordImpression?.(
+                this.campaignId
+            );
         } catch (error) {
             this.showError(error.message);
         }

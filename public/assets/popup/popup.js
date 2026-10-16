@@ -179,6 +179,10 @@ class RewardGatePopup {
             campaign.presentation_settings
         );
 
+        window.rewardGateRecordImpression?.(
+            this.campaignId
+        );
+
         if (campaign.unlock_method === 'click') {
             this.destinationUrl =
                 campaign.presentation_settings.destination_url;
