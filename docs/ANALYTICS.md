@@ -2,44 +2,66 @@
 
 ## Purpose
 
-Define the scope, behavior, implementation sequence, and acceptance criteria for the first analytics release.
+Define the behavior, metric definitions, implementation decisions, and acceptance criteria for Reward Gate analytics.
 
-This document is the implementation plan for analytics. `SPECIFICATION.md` remains the source of truth for overall product requirements. Update this document as implementation decisions change; do not duplicate unrelated project documentation.
+This document is the source of truth for analytics-specific requirements. `SPECIFICATION.md` remains the source of truth for overall product requirements.
+
+The initial campaign analytics implementation is complete. The next iteration expands reporting with additional date-range presets and a daily breakdown of campaign activity.
+
+Keep the analytics implementation focused on useful product functionality. Avoid unnecessary infrastructure, abstractions, or restrictions that do not provide meaningful value.
 
 ## Status
 
-- Planning: complete.
-- Implementation: implemented.
-- Automated tests: passing (218 tests, 1,009 assertions).
-- Final acceptance review: in progress.
-- Target release: v0.4.0.
-- Release scope: basic campaign-level analytics only.
+- Initial analytics implementation: complete.
+- Initial automated tests: passing (218 tests, 1,009 assertions).
+- Initial release: v0.4.0.
+- Next iteration: planned.
+- Next iteration scope:
+  - Add Last 90 Days and This Month reporting presets.
+  - Add a daily breakdown of Shown, Sessions, and Completed.
+  - Keep summary metrics and daily reporting synchronized to the selected reporting period.
+  - Ensure daily totals reconcile with the summary counts.
+  - Refine metric explanations and reporting behavior where necessary.
 
 ## 1. Scope
 
-### Included
+### Implemented
 
 - Record a gate impression after the gate UI has rendered successfully.
 - Deduplicate impressions for the same campaign, visitor, and page view.
-- Display campaign-level counts for the last 7 and 30 UTC calendar days.
+- Display campaign-level summary metrics for a selected reporting period.
 - Display Shown, Sessions, Completed, and Unlock rate.
-- Show a Timer-specific Finished wait rate when existing session data supports reliable identification of Timer sessions.
+- Show a Timer-specific Finished wait rate when stored session data supports reliable identification of historical Timer sessions.
 - Keep analytics collection non-blocking so failures do not interfere with unlocking.
+- Use UTC reporting boundaries and half-open intervals.
+- Use the existing application timezone configuration.
 - Add the database index needed for campaign/date-range session queries.
-- Add automated tests for recording, deduplication, reporting, and failure behavior.
-- Display the actual UTC date range used for each report.
+- Include automated tests for impression recording, deduplication, reporting, and failure behavior.
 
-### Explicitly excluded
+### Next iteration
+
+- Provide four reporting-period presets: Last 7 Days, Last 30 Days, Last 90 Days, and This Month.
+- Apply the selected period consistently to the summary metrics and daily report.
+- Add a daily breakdown of Shown, Sessions, and Completed.
+- Include every UTC calendar date in the selected period, including dates with zero activity.
+- Ensure daily totals reconcile exactly with the corresponding summary counts.
+- Display the actual UTC date range covered by the report.
+- Explain the meaning and limitations of the metrics in the admin UI.
+- Keep reporting queries efficient and compatible with MySQL 8 and MariaDB.
+
+### Not currently included
 
 - Unique-visitor metrics or claims that event counts represent people.
-- Click-through rate in this release.
+- Click-through rate, because the current data model does not reliably associate impressions with sessions.
 - Revenue metrics and external revenue integrations.
 - Verification-failure logging.
-- Event logs, rollup tables, scheduled aggregation, or analytics infrastructure.
-- A/B testing, recommendations, attribution, geographic/device segmentation, or advanced dashboards.
-- Method-specific historical comparisons of sessions and completions, except for a Finished wait rate when historical Timer sessions can be identified reliably from stored session data.
-- A `page_view_id` column on `unlock_sessions`. Revisit only if a genuine click-through metric is later required.
+- Event-level analytics views, rollup tables, or scheduled aggregation.
+- A/B testing, recommendations, attribution, geographic/device segmentation, or advanced analytics infrastructure.
+- Method-specific historical session/completion comparisons, except for Finished wait rate when stored session data reliably identifies historical Timer sessions.
+- A `page_view_id` column on `unlock_sessions`. Revisit if a genuine click-through metric becomes a product requirement.
 - A new general-purpose rate-limiting subsystem solely for analytics.
+
+These exclusions describe the current product scope, not permanent restrictions. Revisit them when a concrete product requirement justifies the additional functionality.
 
 ## 2. Metric definitions
 
@@ -47,18 +69,58 @@ All metrics are event counts, not unique people.
 
 ### Reporting periods
 
-Use UTC calendar days, consistent with the application's existing timezone configuration.
+All reporting periods use UTC calendar dates.
 
-- **Last 7 days:** from 00:00 UTC six calendar days before today, inclusive, through 00:00 UTC tomorrow, exclusive.
-- **Last 30 days:** from 00:00 UTC 29 calendar days before today, inclusive, through 00:00 UTC tomorrow, exclusive.
+The selected period applies to every summary metric and every row in the daily report.
 
-Use half-open intervals:
+#### Available presets
+
+- **Last 7 Days:** Today and the previous six UTC calendar days.
+- **Last 30 Days:** Today and the previous 29 UTC calendar days.
+- **Last 90 Days:** Today and the previous 89 UTC calendar days.
+- **This Month:** The first day of the current UTC calendar month through today.
+
+All presets include today's partial data.
+
+#### Interval semantics
+
+All reporting queries use half-open intervals:
 
 `timestamp >= start_utc AND timestamp < end_utc`
 
-Display the actual inclusive calendar dates covered by the report, explicitly labeled UTC. For example: `October 7–13, UTC`.
+The start boundary is inclusive. The end boundary is exclusive.
 
-The report service must use an explicit reference time rather than reading the system clock internally. Pass a `DateTimeImmutable` reference time into the reporting calculation so date boundaries can be tested deterministically.
+The end boundary is 00:00 UTC tomorrow.
+
+For Last 7 Days, Last 30 Days, and Last 90 Days, the start boundary is 00:00 UTC six, 29, or 89 calendar days before today, respectively.
+
+For This Month, the start boundary is 00:00 UTC on the first day of the current month.
+
+#### Displaying the selected period
+
+Display the actual inclusive calendar dates covered by the report, explicitly labeled UTC.
+
+Examples:
+
+- `October 11–17, 2026, UTC`
+- `July 20–October 17, 2026, UTC`
+- `October 1–17, 2026, UTC`
+
+The displayed dates must match the actual query boundaries.
+
+The reporting-period label must not be converted to the browser's local timezone.
+
+#### Reference time
+
+Reporting-period calculations must accept an explicit `DateTimeImmutable` reference time.
+
+Do not read the system clock from inside the date-range calculation.
+
+This allows deterministic testing of midnight UTC boundaries, month and year transitions, leap years, month lengths, and server environments configured for timezones other than UTC.
+
+Reuse the existing date-range calculation and extend it to support the additional presets rather than introducing a second implementation.
+
+Convert the supplied reference time to UTC before determining the current calendar date or calculating reporting boundaries. All calendar arithmetic must use UTC dates, regardless of the timezone associated with the supplied reference time.
 
 ### Timezone handling
 
@@ -121,7 +183,7 @@ A valid rate of zero completions with at least 20 impressions is **0%**, not a d
 
 The minimum of 20 impressions is a conservative product display rule, not a claim of statistical significance.
 
-Because an impression request can be lost while a session is still recorded, Completed can occasionally exceed Shown. In that case, suppress the rate rather than display a misleading percentage.
+ Because Shown and Completed use different event cohorts and are not directly associated, Completed can occasionally exceed Shown. Lost impression requests can also contribute to this difference. In that case, suppress the rate rather than display a misleading percentage.
 
 The report must explain that a dash can mean the sample is too small or that the rate is not meaningful under the defined rules. It must not look like a calculation error.
 
@@ -166,8 +228,8 @@ Show the counts without relabeling that ratio as click-through.
 
 The two rates answer different questions:
 
-- **Unlock rate:** what proportion of recorded gate impressions corresponded to completed sessions in the same session-start cohort?
-- **Finished wait rate:** what proportion of eligible accepted Timer sessions completed?
+- **Unlock rate:** Completed divided by Shown for the same reporting window. This is an aggregate ratio, not a matched conversion rate, because the application does not directly associate individual impressions with individual sessions.
+- **Finished wait rate:** The proportion of eligible accepted Timer sessions that completed.
 
 Unlock rate can be hidden when Shown is below 20 or Completed exceeds Shown. Finished wait rate can be hidden when fewer than 20 eligible Timer sessions exist.
 
@@ -175,7 +237,106 @@ These are deliberate display rules, not errors.
 
 Browser blocking, network failures, and direct requests can cause event counts to diverge. The report must not imply that the counts are guaranteed to represent every real interaction.
 
-## 3. Data model
+## 3. Daily report
+
+Add a daily breakdown of campaign activity for the selected reporting period.
+
+The report must use the same metric definitions and reporting boundaries as the summary.
+
+### Columns
+
+The daily report contains:
+
+- Date.
+- Shown.
+- Sessions.
+- Completed.
+
+Dates are UTC calendar dates.
+
+The report may be presented as a table, a chart, or a combination of both. Prioritize readability and accurate interpretation over visual complexity.
+
+Do not introduce a charting dependency solely for this report unless a concrete requirement justifies it. A clear table or lightweight native HTML/CSS visualization is sufficient.
+
+Do not add a daily Unlock rate chart. Daily conversion rates could encourage misleading interpretations of low-volume data and would frequently be hidden by the minimum sample-size rule.
+
+Keep Unlock rate and Finished wait rate in the summary metrics.
+
+### Daily Shown
+
+Count impressions grouped by the UTC calendar date of `gate_impressions.created_at`.
+
+Use the same start and end boundaries as the summary.
+
+### Daily Sessions
+
+Count sessions grouped by the UTC calendar date of `unlock_sessions.started_at`.
+
+Include all session statuses, consistent with the summary.
+
+### Daily Completed
+
+Count completions through their associated sessions and group them by the UTC calendar date of the associated session's `started_at`.
+
+Do not group this metric by `unlock_completions.completed_at`.
+
+The daily Completed series must use the same session-start cohort as the summary.
+
+### Reconciliation with summary counts
+
+For every selected reporting period:
+
+- The sum of daily Shown must equal summary Shown.
+- The sum of daily Sessions must equal summary Sessions.
+- The sum of daily Completed must equal summary Completed.
+
+The summary and daily report should be derived from the same underlying metric definitions and equivalent database filters. Avoid maintaining separate implementations of the same counting rules where doing so could cause the results to diverge.
+
+Treat the summary and daily breakdown as one reporting result. If the complete result cannot be obtained, show an appropriate reporting error rather than presenting a mixture of new and stale values or treating query failures as zero activity.
+
+### Missing dates
+
+Return one daily row for every UTC calendar date in the selected period.
+
+Dates without activity must contain zero values.
+
+Generate missing dates in PHP rather than introducing a calendar table or additional database infrastructure.
+
+Include today, even if no events have occurred yet.
+
+### Partial current day
+
+Today's values represent activity recorded from 00:00 UTC through the time the report is generated.
+
+They are not final daily totals.
+
+The UI should make the reporting timezone clear and may note that today's data is partial.
+
+Do not estimate or extrapolate the remainder of the day.
+
+### Sessions crossing midnight
+
+A session belongs to the UTC calendar date on which it started.
+
+A completion belongs to the date of its associated session's start, even if the completion occurred on another date.
+
+For example, if a session starts shortly before midnight and completes after midnight:
+
+- Sessions increases on the start date.
+- Completed increases on the same start date.
+- The completion date does not determine the daily Completed bucket.
+
+### Interpretation
+
+The daily report shows recorded event counts, not unique people.
+
+Sessions may exceed Shown because of retries, repeated attempts, missing impression requests, or multiple accepted sessions associated with a browsing context.
+
+Do not present Sessions divided by Shown as a conversion rate.
+
+Do not imply that every session corresponds to a distinct visitor or impression.
+
+## 4. Data model
 
 ### New table: `gate_impressions`
 
@@ -232,7 +393,7 @@ Do not add a `(campaign_id, completed_at)` index for this release. The Completed
 
 Before finalizing the migration, verify that `started_at` has the properties required by the reporting definitions. If it is not reliable, resolve the timestamp choice before building the reporting queries.
 
-## 4. Collection behavior
+## 5. Collection behavior
 
 ### Recording conditions
 
@@ -290,12 +451,13 @@ The route name is an implementation detail. Do not introduce a new generic analy
 - Return an appropriate response without exposing database details to the public.
 - Keep unrelated persistence failures distinguishable in server-side diagnostics, following existing project conventions.
 - Treat only the expected duplicate-key condition as successful deduplication.
+- Validate the page-view ID as a hyphenated UUID. Normalize it to lowercase before persistence so that case variations cannot bypass string-based deduplication.
 
 Use existing request-throttling protections if the application already has a suitable mechanism. Do not introduce a new general-purpose rate-limiting subsystem solely for analytics in this release.
 
 The public endpoint's exposure to deliberate abuse must be documented and considered before release.
 
-## 5. Admin report
+## 6. Admin report
 
 Add a simple campaign analytics view using the existing admin UI patterns.
 
@@ -306,7 +468,9 @@ For each selected campaign and reporting period, show:
 - Completed
 - Unlock rate
 
-Provide the last 7 days and last 30 days views. Include the actual UTC date range in each view.
+Provide the Last 7 Days, Last 30 Days, Last 90 Days, and This Month presets.
+
+Use a single shared reporting-period selection for the summary metrics and daily report. Include the actual UTC date range covered by the selected period.
 
 Include the Timer Finished wait rate only when the stored session data reliably identifies eligible historical Timer sessions. If that prerequisite is not met, omit the metric rather than display a misleading rate.
 
@@ -327,182 +491,200 @@ The report must explain, in concise UI copy or a tooltip, that:
 
 Do not show click-through rate, unique visitors, revenue, or method-specific historical session/completion comparisons.
 
-## 6. Implementation plan
+### Daily report
 
-Complete each phase in order. Inspect existing code and tests before editing, and keep changes limited to the current phase.
+Display daily Shown, Sessions, and Completed counts for every UTC date in the selected period.
 
-Tests that prove a phase's behavior should be added in that phase rather than postponed until the end.
+Use zero-filled rows for dates without activity.
 
-### Phase 1: Database migration
+Ensure the daily totals reconcile with the summary counts.
 
-- Add the `gate_impressions` table.
-- Add the composite `(campaign_id, started_at)` index to `unlock_sessions`.
-- Follow the project's existing migration/schema update conventions.
-- Verify compatibility with both MySQL 8 and MariaDB.
-- Reuse the existing PHP and MySQL UTC configuration. Do not introduce another timezone mechanism.
-- Verify the properties of `unlock_sessions.started_at`: server-assigned, non-null for accepted sessions, and not rewritten after creation.
-- Add or update schema tests if the project has them.
-- Review the size and collation of the new identifier columns.
+The report may use a table, a lightweight chart, or both.
 
-**Done when:** a clean database can be initialized with the new schema, existing schema setup remains compatible with supported database engines, and the timestamp assumptions required by reporting have been verified.
+If a chart is used:
 
-### Phase 2: Impression recording endpoint and persistence
+- Keep the three event-count series clearly distinguishable.
+- Do not add a daily Unlock rate series.
+- Do not introduce a secondary axis merely to force unrelated metrics into a visualization.
+- Do not imply that event counts represent unique people.
+- Keep UTC date labels unchanged by browser-local timezone conversion.
 
-- Inspect existing routing, request validation, repository, visitor identity, campaign-state, and error-response conventions.
-- Add the smallest endpoint and persistence implementation consistent with the current architecture.
-- Validate campaign existence/state and the page-view UUID according to established endpoint patterns.
-- Get visitor identity through the existing server-side `VisitorId` source.
-- Derive presentation type and unlock method from the server-loaded campaign configuration.
-- Snapshot these values at impression-recording time.
-- Treat only the expected unique-key duplicate as successful deduplication.
-- Ensure unrelated database errors remain distinguishable in server-side diagnostics without exposing database details to the public response.
-- Use the existing database connection and timezone conventions.
+## 7. Implementation plan
 
-**Tests in this phase:**
+The initial impression-collection and summary-reporting implementation is complete. The next iteration extends the reporting functionality.
 
-- A valid impression creates exactly one row.
-- Repeating the same campaign/visitor/page-view key creates no additional row and is treated as success.
-- A new page-view ID creates a new impression.
-- Missing or malformed page-view IDs are rejected.
-- Client-supplied visitor IDs and timestamps are not trusted.
-- Client-supplied presentation types and unlock methods are ignored.
-- The stored snapshot values come from the server-loaded campaign configuration.
-- Nonexistent or inactive campaigns are rejected.
-- An unrelated database error is not mistaken for a duplicate.
+Inspect the existing implementation and tests before editing. Reuse working code, queries, date calculations, and UI components where appropriate.
 
-**Done when:** valid impressions are stored, repeated submissions for the same key do not create duplicate rows, and invalid input or unrelated persistence errors are handled correctly.
+### Phase 1: Reporting-period presets
 
-### Phase 3: Frontend impression registration
+- Extend the existing period selector with Last 90 Days and This Month.
+- Reuse the existing UTC date-range calculation.
+- Apply the selected period to summary metrics.
+- Display the actual inclusive UTC calendar dates.
+- Preserve today's partial data.
+- Keep half-open query boundaries.
 
-- Generate one UUID per document and retain it on `window`.
-- Use `crypto.randomUUID()` where available and a `crypto.getRandomValues()` fallback otherwise.
-- Register an impression only after the gate UI has rendered successfully.
-- Ensure repeated initialization reuses the same page-view ID.
-- Make the request non-blocking and ensure failures do not interfere with the existing unlock flow.
-- Do not record an impression when no gate is shown.
-- Reuse the existing request transport and credential behavior.
+**Tests:**
 
-**Tests in this phase:**
+- Last 7 Days includes exactly seven UTC calendar dates.
+- Last 30 Days includes exactly 30 UTC calendar dates.
+- Last 90 Days includes exactly 90 UTC calendar dates.
+- This Month starts on the first day of the current UTC month.
+- All presets include today.
+- The exclusive end boundary is midnight UTC tomorrow.
+- Date calculations behave correctly across month and year boundaries.
+- Leap years and month lengths are handled correctly.
+- Tests use an explicit reference time and do not depend on the real system clock.
 
-- Popup + Timer records an impression after the popup is rendered.
-- Popup + Click records an impression after the popup is rendered.
-- Content + Click records an impression after the locked state and CTA have been rendered.
-- Repeated initialization within one document reuses the same page-view ID.
-- A fresh document load gets a fresh page-view ID.
-- A missing `crypto.randomUUID()` does not prevent UUID generation when `crypto.getRandomValues()` is available.
-- A visitor already unlocked who sees no gate does not generate an impression.
-- A render failure does not generate an impression.
-- Retry and repeated Click interactions do not generate additional impressions for the same page view.
-- Click handling does not trigger impression registration.
-- Impression-request failure does not block Timer start or Click interaction.
+**Done when:** all four presets produce the correct UTC boundaries and the summary displays the corresponding period.
 
-**Done when:** Popup + Timer, Popup + Click, and Content + Click record impressions under the intended conditions, while analytics endpoint failure does not prevent normal gate behavior.
+### Phase 2: Daily aggregate reporting
 
-### Phase 4: Reporting queries and metric calculations
+- Add daily Shown counts grouped by impression creation date.
+- Add daily Sessions counts grouped by session-start date.
+- Add daily Completed counts grouped by the associated session's start date.
+- Apply the same selected period and campaign filters to all metrics.
+- Fill missing dates with zero-valued rows in PHP.
+- Include today's partial data.
+- Keep SQL aggregation efficient and compatible with MySQL 8 and MariaDB.
 
-- Implement campaign/date-range counts using half-open UTC intervals.
-- Filter Sessions by the verified session-start timestamp.
-- Filter Completed through the associated sessions' session-start timestamp, not completion timestamps.
-- Implement the rate display rules and Timer Finished wait rate where historical Timer sessions can be identified reliably.
-- Keep queries parameterized and consistent with existing repository conventions.
-- Keep the implementation simple. A shared query may be used where it improves consistency and readability, but do not add a reporting abstraction solely to combine queries.
-- Pass an explicit reference time into the reporting calculation rather than reading the current time internally.
-- Return or retain the UTC start and end dates needed for the report labels.
+**Tests:**
 
-**Tests in this phase:**
+- Daily Shown counts use `gate_impressions.created_at`.
+- Daily Sessions include active, expired, and completed sessions.
+- Daily Completed counts use the associated session's `started_at`.
+- A session crossing midnight remains grouped by its start date.
+- A completion recorded outside the reporting period counts if its session started within the period.
+- A completion recorded inside the period does not count if its session started outside the period.
+- Missing dates are returned with zero counts.
+- Every selected UTC calendar date appears exactly once.
+- The first and last dates follow the same boundaries as the summary.
 
-- Sessions in the range include active, expired, and completed statuses.
-- A session starting exactly at the inclusive start boundary is included.
-- A session starting exactly at the exclusive end boundary is excluded.
-- A completion is counted according to its session's start timestamp, including when `completed_at` falls outside the selected range.
-- A completion inside the reporting period is excluded when its associated session started outside the period.
-- Empty periods return zero counts.
-- Zero denominators display `—`.
-- Unlock rate is hidden when Shown is below 20.
-- Unlock rate is hidden when Completed exceeds Shown.
-- Unlock rate displays `0%` when Shown is at least 20 and Completed is zero.
-- Finished wait rate uses the same session cohort and includes only reliably identified Timer sessions.
-- Finished wait rate is hidden below 20 eligible Timer sessions.
-- Finished wait rate displays `0%` when there are at least 20 eligible Timer sessions and none completed.
-- UTC boundaries remain deterministic when the supplied reference time crosses a month, year, or daylight-saving transition in the server's local timezone.
+**Done when:** the daily report returns correct counts for every date in the selected period, including dates without activity.
 
-**Done when:** the report uses consistent cohorts, handles empty periods and date boundaries, and never displays a rate when its defined display conditions are not met.
+### Phase 3: Reconciliation and consistency
 
-### Phase 5: Admin UI
+- Ensure the daily report and summary use identical metric definitions.
+- Ensure daily Completed and summary Completed use the same session-start cohort.
+- Ensure all reporting components use the same selected period.
+- Verify that no metric silently applies different session statuses or timestamp definitions.
 
-- Add the report to the existing admin navigation and campaign UI using current project patterns.
-- Show the 7-day and 30-day counts and rates.
-- Show the actual UTC date range for each reporting period.
-- Show Finished wait rate for Timer campaigns only when historical Timer sessions can be identified reliably.
-- Include concise metric definitions and avoid implying that event counts equal unique people.
-- Explain why a rate may display as `—`.
-- Escape output and use existing admin authorization patterns.
+**Tests:**
 
-**Done when:** an administrator can view understandable analytics for a campaign without needing to interpret raw database records.
+For each reporting period:
 
-### Phase 6: Automated tests and regression checks
+- Sum of daily Shown equals summary Shown.
+- Sum of daily Sessions equals summary Sessions.
+- Sum of daily Completed equals summary Completed.
 
-Ensure the phase-specific tests are in place, then run the complete relevant test suite.
+Include tests with sessions crossing midnight and completions recorded on a different date from their associated session's start.
 
-Test at minimum:
+**Done when:** all daily totals reconcile exactly with the summary counts for the same campaign and reporting period.
 
-- Valid impression creates one row.
-- Repeating the same campaign/visitor/page-view key creates no additional row and is treated as success.
-- A new page-view ID creates a new impression.
-- Missing or malformed page-view IDs are rejected.
-- Client-supplied visitor IDs, timestamps, presentation types, and unlock methods are not trusted.
-- A visitor already unlocked who sees no gate does not generate an impression.
-- A render failure does not generate an impression.
-- Impression-request failure does not block Timer start or Click interaction.
-- Retry and repeated Click interactions do not write additional impressions for the same page view.
-- Nonexistent and inactive campaigns are rejected.
-- An unrelated database error is not treated as a duplicate.
-- Sessions in the range include active, expired, and completed statuses.
-- A session at the inclusive start boundary is included and a session at the exclusive end boundary is excluded.
-- A completion is counted according to its session's start timestamp, including when `completed_at` falls outside the selected range.
-- A completion inside the range is excluded when its associated session started outside the range.
-- Empty periods and zero denominators display `—`.
-- Rates are hidden when Shown is below 20 or Completed exceeds Shown.
-- Zero completions with a sufficient denominator display `0%`.
-- Finished wait rate uses the same session cohort and only reliably identified Timer sessions.
-- Finished wait rate is hidden below 20 eligible Timer sessions.
-- UTC handling is correct and date-boundary tests do not depend on the real system clock.
-- Existing unlock, frequency-limit, security, and campaign behavior continues to pass.
+### Phase 4: Admin UI
 
-**Done when:** all relevant new tests pass and the full existing test suite passes.
+- Add Last 90 Days and This Month to the existing reporting-period selector.
+- Add the daily report to the campaign analytics view.
+- Apply the selected period to both the summary and daily report.
+- Display the actual UTC date range.
+- Display zero-activity dates.
+- Explain that today's data is partial.
+- Explain the meaning and limitations of the event counts.
+- Keep the existing Unlock rate and Finished wait rate rules.
+- Do not add daily conversion rates.
+- Keep the UI consistent with the existing admin interface.
 
-## 7. Known limitations
+**Done when:** administrators can switch between all four presets and view consistent summary metrics and daily counts for the selected period.
+
+### Phase 5: Regression testing and quality checks
+
+- Run reporting-specific tests.
+- Run existing analytics tests.
+- Run the full relevant test suite.
+- Check empty periods, low event counts, and populated periods.
+- Check that the summary and daily report update together when the selected period changes.
+- Check that reporting errors do not display misleading zero counts or stale data.
+- Verify compatibility with supported MySQL and MariaDB environments where practical.
+
+Existing impression collection, deduplication, unlocking, frequency-limit, security, and campaign behavior must remain unchanged.
+
+**Done when:** all relevant tests pass, daily counts reconcile with the summary, and existing application behavior remains intact.
+
+## 8. Known limitations
 
 - Counts are events, not unique visitors.
 - Browser blocking, network failures, or an analytics endpoint outage can cause impressions to be undercounted.
 - The page-view ID is a deduplication mechanism, not a security boundary.
-- Anyone able to call the public impression endpoint may attempt to inflate counts with fabricated page-view IDs. The analytics endpoint must not be treated as proof of genuine human interaction.
-- Use existing request-throttling protections where available. A dedicated analytics rate-limiting subsystem is outside this release's scope.
-- One row is stored per recorded page view. The table can grow with traffic; retention and pruning should be considered before broad distribution, but scheduled aggregation and retention infrastructure are not part of this release.
-- Historical presentation and unlock method are preserved on impressions, but not necessarily on existing session/completion records. Do not present method-specific historical session/completion rates unless the stored session data reliably supports them.
+- Anyone able to call the public impression endpoint may attempt to inflate counts with fabricated page-view IDs. The endpoint must not be treated as proof of genuine human interaction.
+- Use existing request-throttling protections where available. A dedicated analytics rate-limiting subsystem is not currently required.
+- One row is stored per recorded page view. The table can grow with traffic. Retention and pruning should be considered as the product scales.
+- Historical presentation and unlock methods are preserved on impressions but not necessarily on existing session/completion records. Do not present method-specific historical session/completion rates unless the stored session data reliably supports them.
 - If historical Timer sessions cannot be distinguished from Click sessions, omit Finished wait rate rather than infer historical methods from the current campaign configuration.
 - Changing campaign configuration can make comparisons across periods harder to interpret. Duplicating a campaign for a materially different setup is a possible operational workaround, not an enforced requirement.
-- Unlock rate may be hidden when Shown is below 20 or Completed exceeds Shown. This is an intentional safeguard, not a reporting failure.
-- No revenue attribution or advanced analytics is provided in this release.
+- Unlock rate may be hidden when Shown is below 20 or Completed exceeds Shown. This is an intentional display rule.
+- Finished wait rate may be hidden when fewer than 20 eligible Timer sessions exist.
+- Daily counts represent recorded events grouped by defined timestamps. They do not establish unique visitors, direct attribution, or guaranteed one-to-one relationships between impressions and sessions.
+- Today's daily counts are partial and will change as more events are recorded.
+- Daily Completed is grouped by the associated session's start date, not the completion date.
+- Revenue attribution and advanced analytics are not currently implemented.
 
-## 8. Release acceptance checklist
+## 9. Next iteration acceptance checklist
 
-- [x] Database migration/schema update works on MySQL 8 and MariaDB.
-- [x] Existing PHP and MySQL UTC configuration is reused for analytics timestamps.
-- [x] Session-start timestamp assumptions are verified against the existing schema and service.
-- [x] Impression rows are created only after successful gate rendering.
-- [x] Same-document duplicate initialization is deduplicated.
-- [x] Impression requests reuse the existing visitor cookie and credential behavior.
-- [x] Client-supplied visitor IDs, timestamps, presentation types, and unlock methods are ignored.
-- [x] Expected duplicate submissions are handled without masking unrelated database errors.
-- [x] Analytics failures never block gate functionality.
-- [x] Reporting date boundaries use UTC and half-open intervals.
+### Reporting periods
+
+- [x] Last 7 Days is available and uses the correct UTC boundaries.
+- [x] Last 30 Days is available and uses the correct UTC boundaries.
+- [x] Last 90 Days is available and uses the correct UTC boundaries.
+- [x] This Month is available and starts on the first day of the current UTC month.
+- [x] All presets include today's partial data.
+- [x] All periods use half-open UTC intervals.
+- [x] The displayed date range matches the actual query boundaries.
 - [x] Date-boundary tests use an explicit reference time.
-- [x] Completed is calculated through sessions filtered by the session-start timestamp.
-- [x] Rates follow the documented display rules, including the minimum sample sizes.
-- [x] Timer Finished wait rate is shown only when historical Timer sessions can be identified reliably.
-- [x] Admin UI displays the actual UTC date ranges and explains the metrics.
-- [x] Admin UI does not claim unique visitors or click-through rate.
-- [x] Public-endpoint abuse and impression-table growth limitations are documented.
+
+### Daily report
+
+- [x] Daily Shown is grouped by impression creation date.
+- [x] Daily Sessions is grouped by session-start date.
+- [x] Daily Completed is grouped by the associated session's start date.
+- [x] All session statuses are included in Sessions.
+- [x] Every UTC calendar date in the selected period appears in the report.
+- [x] Dates without activity have zero counts.
+- [x] Today's partial data is included.
+- [x] Daily Shown totals equal summary Shown.
+- [x] Daily Sessions totals equal summary Sessions.
+- [x] Daily Completed totals equal summary Completed.
+- [x] Sessions crossing midnight are grouped by their start date.
+- [x] Daily date labels remain in UTC.
+
+### Admin UI
+
+- [x] The selected reporting period applies to the summary and daily report.
+- [x] The actual UTC date range is displayed.
+- [x] Metric explanations describe event counts and their limitations.
+- [x] The UI explains that today's data is partial.
+- [x] Existing Unlock rate display rules remain unchanged.
+- [x] Existing Finished wait rate display rules remain unchanged.
+- [x] No daily Unlock rate chart is introduced.
+- [x] Reporting failures do not present misleading zero counts or stale results.
+- [x] Summary metrics, timeline chart, and daily report update together when the period changes.
+- [x] Chart labels use readable dates.
+- [x] The daily report uses readable date labels.
+- [x] The analytics layout works on mobile and desktop.
+- [x] Chart resizing and daily-table horizontal scrolling work correctly.
+
+### Compatibility and regression
+
+- [x] Queries remain compatible with MySQL 8 and MariaDB.
+- [x] Existing indexes are reused where appropriate.
+- [x] No unnecessary schema changes are introduced.
+- [x] No unnecessary analytics infrastructure or dependencies are added.
+- [x] Existing impression collection and deduplication continue to work.
+- [x] Analytics failures remain non-blocking for gate functionality.
+- [x] Existing unlocking, frequency-limit, security, and campaign behavior continues to pass.
 - [x] New tests and the existing regression suite pass.
-- [ ] `ANALYTICS.md` status and any implementation deviations are updated before release.
+
+### Documentation
+
+- [x] `ANALYTICS.md` reflects the implemented behavior.
+- [x] Any implementation deviations are documented.
+- [x] Acceptance status is updated after verification.

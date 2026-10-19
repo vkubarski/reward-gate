@@ -1058,6 +1058,13 @@ final class CampaignControllerTest extends TestCase
             '7_days' => [
                 'start' => '2026-10-11 00:00:00',
                 'end' => '2026-10-18 00:00:00',
+                'daily' => [
+                    '2026-10-17' => [
+                        'shown' => 100,
+                        'sessions' => 40,
+                        'completed' => 25,
+                    ],
+                ],
                 'shown' => 100,
                 'sessions' => 40,
                 'completed' => 25,
@@ -1069,6 +1076,13 @@ final class CampaignControllerTest extends TestCase
             '30_days' => [
                 'start' => '2026-09-18 00:00:00',
                 'end' => '2026-10-18 00:00:00',
+                'daily' => [
+                    '2026-10-17' => [
+                        'shown' => 100,
+                        'sessions' => 40,
+                        'completed' => 25,
+                    ],
+                ],
                 'shown' => 500,
                 'sessions' => 200,
                 'completed' => 120,
@@ -1116,11 +1130,11 @@ final class CampaignControllerTest extends TestCase
             $response['body']
         );
         $this->assertStringContainsString(
-            'Last 7 days',
+            'Last 7 Days',
             $response['body']
         );
         $this->assertStringContainsString(
-            'Last 30 days',
+            'Last 30 Days',
             $response['body']
         );
         $this->assertStringContainsString(

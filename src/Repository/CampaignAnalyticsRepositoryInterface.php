@@ -11,4 +11,10 @@ interface CampaignAnalyticsRepositoryInterface
         string $start,
         string $end,
     ): array;
+
+    public function getDailyCounts(
+        int $campaignId,
+        string $start,
+        string $end,
+    ): array;
 }

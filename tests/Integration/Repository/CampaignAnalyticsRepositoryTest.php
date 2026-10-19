@@ -69,24 +69,56 @@ final class CampaignAnalyticsRepositoryTest extends IntegrationTestCase
         $start = '2026-10-10 00:00:00';
         $end = '2026-10-17 00:00:00';
 
-        $impressionRepository = new GateImpressionRepository($this->pdo);
-
         // Two impressions inside the reporting window.
-        $impressionRepository->record(
-            $campaignId,
-            str_repeat('a', 64),
-            '550e8400-e29b-41d4-a716-446655440001',
-            'popup',
-            'timer',
-        );
+        $this->pdo->prepare(
+            'INSERT INTO gate_impressions (
+                campaign_id,
+                visitor_id,
+                page_view_id,
+                presentation_type,
+                unlock_method,
+                created_at
+            ) VALUES (
+                :campaign_id,
+                :visitor_id,
+                :page_view_id,
+                :presentation_type,
+                :unlock_method,
+                :created_at
+            )'
+        )->execute([
+            'campaign_id' => $campaignId,
+            'visitor_id' => str_repeat('a', 64),
+            'page_view_id' => '550e8400-e29b-41d4-a716-446655440001',
+            'presentation_type' => 'popup',
+            'unlock_method' => 'timer',
+            'created_at' => '2026-10-12 12:00:00',
+        ]);
 
-        $impressionRepository->record(
-            $campaignId,
-            str_repeat('b', 64),
-            '550e8400-e29b-41d4-a716-446655440002',
-            'popup',
-            'click',
-        );
+        $this->pdo->prepare(
+            'INSERT INTO gate_impressions (
+                campaign_id,
+                visitor_id,
+                page_view_id,
+                presentation_type,
+                unlock_method,
+                created_at
+            ) VALUES (
+                :campaign_id,
+                :visitor_id,
+                :page_view_id,
+                :presentation_type,
+                :unlock_method,
+                :created_at
+            )'
+        )->execute([
+            'campaign_id' => $campaignId,
+            'visitor_id' => str_repeat('b', 64),
+            'page_view_id' => '550e8400-e29b-41d4-a716-446655440002',
+            'presentation_type' => 'popup',
+            'unlock_method' => 'click',
+            'created_at' => '2026-10-16 12:00:00',
+        ]);
 
         // An impression exactly at the exclusive end boundary.
         $this->pdo->prepare(
@@ -211,5 +243,114 @@ final class CampaignAnalyticsRepositoryTest extends IntegrationTestCase
             'timer_sessions' => 0,
             'timer_completed' => 0,
         ], $counts);
+    }
+
+    public function testGetDailyCountsGroupsMetricsBySessionStartDate(): void
+    {
+        $campaignId = $this->createCampaign();
+
+        $start = '2026-10-10 00:00:00';
+        $end = '2026-10-17 00:00:00';
+
+        $this->pdo->prepare(
+            'INSERT INTO gate_impressions (
+                campaign_id,
+                visitor_id,
+                page_view_id,
+                presentation_type,
+                unlock_method,
+                created_at
+            ) VALUES (
+                :campaign_id,
+                :visitor_id,
+                :page_view_id,
+                :presentation_type,
+                :unlock_method,
+                :created_at
+            )'
+        )->execute([
+            'campaign_id' => $campaignId,
+            'visitor_id' => str_repeat('d', 64),
+            'page_view_id' => '550e8400-e29b-41d4-a716-446655440004',
+            'presentation_type' => 'popup',
+            'unlock_method' => 'timer',
+            'created_at' => '2026-10-12 12:00:00',
+        ]);
+
+        $this->pdo->prepare(
+            'INSERT INTO gate_impressions (
+                campaign_id,
+                visitor_id,
+                page_view_id,
+                presentation_type,
+                unlock_method,
+                created_at
+            ) VALUES (
+                :campaign_id,
+                :visitor_id,
+                :page_view_id,
+                :presentation_type,
+                :unlock_method,
+                :created_at
+            )'
+        )->execute([
+            'campaign_id' => $campaignId,
+            'visitor_id' => str_repeat('e', 64),
+            'page_view_id' => '550e8400-e29b-41d4-a716-446655440005',
+            'presentation_type' => 'popup',
+            'unlock_method' => 'click',
+            'created_at' => '2026-10-16 12:00:00',
+        ]);
+
+        $timerToken = 'daily-timer';
+        $timerSessionId = $this->createSession(
+            $campaignId,
+            $timerToken,
+            10,
+            '2026-10-12 23:59:00',
+        );
+
+        $clickToken = 'daily-click';
+        $clickSessionId = $this->createSession(
+            $campaignId,
+            $clickToken,
+            0,
+            '2026-10-16 12:00:00',
+        );
+
+        $this->createCompletion(
+            $timerSessionId,
+            $campaignId,
+            $timerToken,
+            '2026-10-13 00:00:05',
+        );
+
+        $this->createCompletion(
+            $clickSessionId,
+            $campaignId,
+            $clickToken,
+            '2026-10-16 12:00:01',
+        );
+
+        $repository = new CampaignAnalyticsRepository($this->pdo);
+
+        $daily = $repository->getDailyCounts(
+            $campaignId,
+            $start,
+            $end,
+        );
+
+        $this->assertSame([
+            '2026-10-12' => [
+                'shown' => 1,
+                'sessions' => 1,
+                'completed' => 1,
+            ],
+            '2026-10-16' => [
+                'shown' => 1,
+                'sessions' => 1,
+                'completed' => 1,
+            ],
+        ], $daily);
     }
 }

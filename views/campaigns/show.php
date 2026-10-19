@@ -223,103 +223,184 @@ $analyticsMetrics = [
         'description' => 'Percentage of eligible timer sessions that were successfully completed. Displayed only when there are at least 20 eligible timer sessions and completed sessions do not exceed the eligible total.',
     ],
 ];
+
+$selectedPeriod = '7_days';
+$selectedAnalytics = $analytics[$selectedPeriod];
 ?>
 
-<div class="card shadow-sm mt-4">
-    <div class="card-header">
-        <h2 class="h5 mb-1">Analytics</h2>
+<div
+    class="card shadow-sm mt-4"
+    id="campaign-analytics"
+>
+    <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+            <h2 class="h5 mb-1">Analytics</h2>
+            <p class="text-body-secondary small mb-0">
+                All dates use UTC. Rates are hidden when the sample size is too small.
+            </p>
+        </div>
 
-        <p class="text-body-secondary small mb-0">
-            UTC calendar days. Rates are hidden when the sample size is too small.
-        </p>
+        <div class="d-flex align-items-center gap-2">
+            <label for="analytics-period" class="form-label mb-0">
+                Period
+            </label>
+
+            <select
+                id="analytics-period"
+                class="form-select form-select-sm"
+                aria-label="Analytics reporting period"
+            >
+                <option value="7_days">Last 7 Days</option>
+                <option value="30_days">Last 30 Days</option>
+                <option value="90_days">Last 90 Days</option>
+                <option value="this_month">This Month</option>
+            </select>
+        </div>
     </div>
 
     <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-striped align-middle mb-0">
-                <thead>
-                    <tr>
-                        <th scope="col">Metric</th>
-                        <th scope="col" class="text-end">
-                            Last 7 days
-                            <div class="small fw-normal text-body-secondary">
-                                <?= htmlspecialchars(
-                                    $formatPeriod($analytics['7_days']),
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                ) ?>
-                            </div>
-                        </th>
+        <p
+            id="analytics-period-dates"
+            class="small text-body-secondary mb-4"
+        >
+            <?= htmlspecialchars(
+                $formatPeriod($selectedAnalytics),
+                ENT_QUOTES,
+                'UTF-8'
+            ) ?>
+        </p>
 
-                        <th scope="col" class="text-end">
-                            Last 30 days
-                            <div class="small fw-normal text-body-secondary">
-                                <?= htmlspecialchars(
-                                    $formatPeriod($analytics['30_days']),
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                ) ?>
-                            </div>
-                        </th>
-                    </tr>
-                </thead>
+        <section aria-labelledby="analytics-summary-heading" class="mb-4">
+            <h3 id="analytics-summary-heading" class="h6 mb-3">
+                Summary
+            </h3>
 
-                <tbody>
-                    <?php foreach ($analyticsMetrics as $key => $metric): ?>
+            <div class="table-responsive">
+                <table class="table table-striped align-middle mb-0">
+                    <thead>
                         <tr>
-                            <th scope="row">
-                                <?= htmlspecialchars(
-                                    $metric['label'],
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                ) ?>
+                            <th scope="col">Metric</th>
+                            <th scope="col" class="text-end">Value</th>
+                        </tr>
+                    </thead>
 
-                                <button
-                                    type="button"
-                                    class="btn btn-link btn-sm p-0 ms-1 text-body-secondary align-baseline"
-                                    data-bs-toggle="tooltip"
-                                    data-bs-placement="top"
-                                    title="<?= htmlspecialchars(
-                                        $metric['description'],
+                    <tbody id="analytics-summary-body">
+                        <?php foreach ($analyticsMetrics as $key => $metric): ?>
+                            <tr>
+                                <th scope="row">
+                                    <?= htmlspecialchars(
+                                        $metric['label'],
                                         ENT_QUOTES,
                                         'UTF-8'
-                                    ) ?>"
-                                    aria-label="About <?= htmlspecialchars(
-                                        $metric['label'],
+                                    ) ?>
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-link btn-sm p-0 ms-1 text-body-secondary align-baseline"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top"
+                                        title="<?= htmlspecialchars(
+                                            $metric['description'],
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?>"
+                                        aria-label="About <?= htmlspecialchars(
+                                            $metric['label'],
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?>"
+                                    >
+                                        <span aria-hidden="true">ⓘ</span>
+                                    </button>
+                                </th>
+
+                                <td
+                                    class="text-end"
+                                    data-analytics-metric="<?= htmlspecialchars(
+                                        $key,
                                         ENT_QUOTES,
                                         'UTF-8'
                                     ) ?>"
                                 >
-                                    <span aria-hidden="true">ⓘ</span>
-                                </button>
-                            </th>
-
-                            <?php foreach (['7_days', '30_days'] as $period): ?>
-                                <td class="text-end">
                                     <?php if (str_ends_with($key, '_rate')): ?>
                                         <?= htmlspecialchars(
-                                            $formatRate(
-                                                $analytics[$period][$key]
-                                            ),
+                                            $formatRate($selectedAnalytics[$key]),
                                             ENT_QUOTES,
                                             'UTF-8'
                                         ) ?>
                                     <?php else: ?>
-                                        <?= (int)$analytics[$period][$key] ?>
+                                        <?= (int)$selectedAnalytics[$key] ?>
                                     <?php endif; ?>
                                 </td>
-                            <?php endforeach; ?>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section aria-labelledby="analytics-timeline-heading" class="mb-4">
+            <h3 id="analytics-timeline-heading" class="h6 mb-3">
+                Activity over time
+            </h3>
+
+            <div style="position: relative; min-height: 280px;">
+                <canvas
+                    id="analytics-timeline-chart"
+                    role="img"
+                    aria-label="Daily gate impressions, unlock sessions, and completed unlocks"
+                >
+                    Daily gate activity chart.
+                </canvas>
+            </div>
+        </section>
+
+        <section aria-labelledby="analytics-daily-heading">
+            <h3 id="analytics-daily-heading" class="h6 mb-3">
+                Daily breakdown
+            </h3>
+
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">UTC date</th>
+                            <th scope="col" class="text-end">Shown</th>
+                            <th scope="col" class="text-end">Sessions</th>
+                            <th scope="col" class="text-end">Completed</th>
                         </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
+                    </thead>
+
+                    <tbody id="analytics-daily-body">
+                        <?php foreach ($selectedAnalytics['daily'] as $date => $counts): ?>
+                            <tr>
+                                <th scope="row">
+                                    <?= htmlspecialchars(
+                                        $date,
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>
+                                </th>
+                                <td class="text-end"><?= (int)$counts['shown'] ?></td>
+                                <td class="text-end"><?= (int)$counts['sessions'] ?></td>
+                                <td class="text-end"><?= (int)$counts['completed'] ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </div>
 </div>
 
+<script type="application/json" id="campaign-analytics-data"><?= json_encode(
+    $analytics,
+    JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_THROW_ON_ERROR
+) ?></script>
+
 <script>
     document
-        .querySelectorAll('[data-bs-toggle="tooltip"]')
+        .querySelectorAll('#campaign-analytics [data-bs-toggle="tooltip"]')
         .forEach((element) => {
             bootstrap.Tooltip.getOrCreateInstance(element);
         });

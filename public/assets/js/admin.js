@@ -300,4 +300,254 @@
 
         updateSettings();
     }
+
+    function initializeCampaignAnalytics() {
+        const dataElement = document.querySelector(
+            '#campaign-analytics-data'
+        );
+        const periodSelect = document.querySelector(
+            '#analytics-period'
+        );
+        const datesElement = document.querySelector(
+            '#analytics-period-dates'
+        );
+        const summaryBody = document.querySelector(
+            '#analytics-summary-body'
+        );
+        const dailyBody = document.querySelector(
+            '#analytics-daily-body'
+        );
+        const chartCanvas = document.querySelector(
+            '#analytics-timeline-chart'
+        );
+
+        if (
+            !dataElement
+            || !periodSelect
+            || !datesElement
+            || !summaryBody
+            || !dailyBody
+            || !chartCanvas
+            || typeof Chart === 'undefined'
+        ) {
+            return;
+        }
+
+        const analytics = JSON.parse(dataElement.textContent);
+
+        const metricLabels = {
+            shown: 'Shown',
+            sessions: 'Sessions',
+            completed: 'Completed',
+            unlock_rate: 'Unlock rate',
+            timer_sessions: 'Timer sessions',
+            timer_completed: 'Timer completed',
+            timer_finished_wait_rate: 'Timer Finished wait rate',
+        };
+
+        const monthNames = [
+            'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+        ];
+
+        function formatDate(dateString) {
+            const [year, month, day] = dateString
+                .split('-')
+                .map(Number);
+
+            return `${monthNames[month - 1]} ${day}, ${year}`;
+        }
+
+        function formatPeriod(period) {
+            const startDate = period.start.slice(0, 10);
+
+            const endDate = new Date(
+                `${period.end.slice(0, 10)}T00:00:00Z`
+            );
+
+            endDate.setUTCDate(endDate.getUTCDate() - 1);
+
+            const endString = [
+                endDate.getUTCFullYear(),
+                String(endDate.getUTCMonth() + 1).padStart(2, '0'),
+                String(endDate.getUTCDate()).padStart(2, '0'),
+            ].join('-');
+
+            const [startYear] = startDate.split('-');
+            const [endYear] = endString.split('-');
+
+            const startLabel = formatDate(startDate);
+            const endLabel = formatDate(endString);
+
+            if (startYear === endYear) {
+                return `${startLabel.slice(0, -6)} – ${endLabel} UTC`;
+            }
+
+            return `${startLabel} – ${endLabel} UTC`;
+        }
+
+        function formatRate(rate) {
+            return rate === null
+                ? '—'
+                : `${Number(rate).toFixed(1)}%`;
+        }
+
+        function formatMetric(key, value) {
+            return key.endsWith('_rate')
+                ? formatRate(value)
+                : String(Number(value));
+        }
+
+        function renderSummary(period) {
+            Object.keys(metricLabels).forEach((key) => {
+                const cell = summaryBody.querySelector(
+                    `[data-analytics-metric="${key}"]`
+                );
+
+                if (cell) {
+                    cell.textContent = formatMetric(
+                        key,
+                        period[key]
+                    );
+                }
+            });
+        }
+
+        function renderDaily(period) {
+            const fragment = document.createDocumentFragment();
+
+            Object.entries(period.daily).forEach(([date, counts]) => {
+                const row = document.createElement('tr');
+                const dateCell = document.createElement('th');
+
+                dateCell.scope = 'row';
+                dateCell.textContent = formatDate(date);
+                row.appendChild(dateCell);
+
+                ['shown', 'sessions', 'completed'].forEach((key) => {
+                    const cell = document.createElement('td');
+
+                    cell.className = 'text-end';
+                    cell.textContent = String(Number(counts[key]));
+                    row.appendChild(cell);
+                });
+
+                fragment.appendChild(row);
+            });
+
+            dailyBody.replaceChildren(fragment);
+        }
+
+        const rootStyles = getComputedStyle(
+            document.documentElement
+        );
+
+        const chart = new Chart(chartCanvas, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        label: 'Shown',
+                        data: [],
+                        borderColor: rootStyles.getPropertyValue(
+                            '--bs-primary'
+                        ).trim(),
+                        backgroundColor: rootStyles.getPropertyValue(
+                            '--bs-primary'
+                        ).trim(),
+                        tension: 0.25,
+                    },
+                    {
+                        label: 'Sessions',
+                        data: [],
+                        borderColor: rootStyles.getPropertyValue(
+                            '--bs-success'
+                        ).trim(),
+                        backgroundColor: rootStyles.getPropertyValue(
+                            '--bs-success'
+                        ).trim(),
+                        tension: 0.25,
+                    },
+                    {
+                        label: 'Completed',
+                        data: [],
+                        borderColor: rootStyles.getPropertyValue(
+                            '--bs-warning'
+                        ).trim(),
+                        backgroundColor: rootStyles.getPropertyValue(
+                            '--bs-warning'
+                        ).trim(),
+                        tension: 0.25,
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0,
+                        },
+                    },
+                },
+            },
+        });
+
+        function renderChart(period) {
+            const entries = Object.entries(period.daily);
+
+            chart.data.labels = entries.map(([date]) => {
+                return formatDate(date).replace(/, \d{4}$/, '');
+            });
+
+            chart.data.datasets[0].data = entries.map(
+                ([, counts]) => Number(counts.shown)
+            );
+
+            chart.data.datasets[1].data = entries.map(
+                ([, counts]) => Number(counts.sessions)
+            );
+
+            chart.data.datasets[2].data = entries.map(
+                ([, counts]) => Number(counts.completed)
+            );
+
+            chart.update();
+        }
+
+        function updateDashboard() {
+            const period = analytics[periodSelect.value];
+
+            if (!period) {
+                return;
+            }
+
+            datesElement.textContent = formatPeriod(period);
+            renderSummary(period);
+            renderDaily(period);
+            renderChart(period);
+        }
+
+        periodSelect.addEventListener(
+            'change',
+            updateDashboard
+        );
+
+        updateDashboard();
+    }
+
+    initializeCampaignAnalytics();
+
 })();

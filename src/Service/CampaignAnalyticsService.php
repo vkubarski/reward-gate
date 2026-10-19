@@ -23,14 +23,17 @@ final class CampaignAnalyticsService implements CampaignAnalyticsServiceInterfac
     ): array {
         $utc = new DateTimeZone('UTC');
 
-        $tomorrow = $referenceTime
+        $today = $referenceTime
             ->setTimezone($utc)
-            ->setTime(0, 0)
-            ->modify('+1 day');
+            ->setTime(0, 0);
+
+        $tomorrow = $today->modify('+1 day');
 
         $periods = [
             '7_days' => $tomorrow->modify('-7 days'),
             '30_days' => $tomorrow->modify('-30 days'),
+            '90_days' => $tomorrow->modify('-90 days'),
+            'this_month' => $today->modify('first day of this month'),
         ];
 
         $report = [];
@@ -44,9 +47,32 @@ final class CampaignAnalyticsService implements CampaignAnalyticsServiceInterfac
                 $end->format('Y-m-d H:i:s'),
             );
 
+            $dailyCounts = $this->repository->getDailyCounts(
+                $campaignId,
+                $start->format('Y-m-d H:i:s'),
+                $end->format('Y-m-d H:i:s'),
+            );
+
+            $daily = [];
+
+            for (
+                $date = $start;
+                $date < $end;
+                $date = $date->modify('+1 day')
+            ) {
+                $dateKey = $date->format('Y-m-d');
+
+                $daily[$dateKey] = $dailyCounts[$dateKey] ?? [
+                    'shown' => 0,
+                    'sessions' => 0,
+                    'completed' => 0,
+                ];
+            }
+
             $report[$period] = [
                 'start' => $start->format('Y-m-d H:i:s'),
                 'end' => $end->format('Y-m-d H:i:s'),
+                'daily' => $daily,
                 ...$counts,
                 'unlock_rate' => $this->calculateRate(
                     $counts['completed'],

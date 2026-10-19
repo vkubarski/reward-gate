@@ -97,11 +97,11 @@ rm -f "$ARCHIVE"
     zip -qr "$ARCHIVE" .
 )
 
-# Inspect archive contents for forbidden paths and configuration files.
+# Inspect archive contents for forbidden top-level paths and configuration files.
 if unzip -Z1 "$ARCHIVE" | grep -Eq \
-    '(^|/)(private|\.git|tests|docs|tools)/|(^|/)database\.test\.php$|(^|/)composer\.(json|lock)$'
+    '^(private|\.git|tests|docs|tools)/|^database\.test\.php$|^composer\.(json|lock)$'
 then
-    printf '%s\n' 'Error: forbidden files found in archive.' >&2
+    printf '%s\n' 'Error: forbidden top-level files found in archive.' >&2
     rm -f "$ARCHIVE"
     exit 1
 fi

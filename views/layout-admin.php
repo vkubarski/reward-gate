@@ -234,6 +234,7 @@ declare(strict_types=1);
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
 <script src="<?= \RewardGate\Http\Url::to('/assets/js/url.js') ?>"></script>
 <script src="<?= \RewardGate\Http\Url::to('/assets/js/admin.js') ?>"></script>
 

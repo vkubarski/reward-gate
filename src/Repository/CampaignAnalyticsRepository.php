@@ -90,4 +90,101 @@ final class CampaignAnalyticsRepository implements CampaignAnalyticsRepositoryIn
             'timer_completed' => (int) $completed['timer_completed'],
         ];
     }
+
+    public function getDailyCounts(
+        int $campaignId,
+        string $start,
+        string $end,
+    ): array {
+        $shownStatement = $this->pdo->prepare(
+            'SELECT
+                DATE(created_at) AS report_date,
+                COUNT(*) AS shown
+             FROM gate_impressions
+             WHERE campaign_id = :campaign_id
+               AND created_at >= :start
+               AND created_at < :end
+             GROUP BY DATE(created_at)'
+        );
+
+        $shownStatement->execute([
+            'campaign_id' => $campaignId,
+            'start' => $start,
+            'end' => $end,
+        ]);
+
+        $daily = [];
+
+        foreach ($shownStatement->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $daily[$row['report_date']] = [
+                'shown' => (int) $row['shown'],
+                'sessions' => 0,
+                'completed' => 0,
+            ];
+        }
+
+        $sessionsStatement = $this->pdo->prepare(
+            'SELECT
+                DATE(started_at) AS report_date,
+                COUNT(*) AS sessions
+             FROM unlock_sessions
+             WHERE campaign_id = :campaign_id
+               AND started_at >= :start
+               AND started_at < :end
+             GROUP BY DATE(started_at)'
+        );
+
+        $sessionsStatement->execute([
+            'campaign_id' => $campaignId,
+            'start' => $start,
+            'end' => $end,
+        ]);
+
+        foreach ($sessionsStatement->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $date = $row['report_date'];
+
+            $daily[$date] ??= [
+                'shown' => 0,
+                'sessions' => 0,
+                'completed' => 0,
+            ];
+
+            $daily[$date]['sessions'] = (int) $row['sessions'];
+        }
+
+        $completedStatement = $this->pdo->prepare(
+            'SELECT
+                DATE(s.started_at) AS report_date,
+                COUNT(*) AS completed
+             FROM unlock_completions AS c
+             INNER JOIN unlock_sessions AS s
+                ON s.id = c.unlock_session_id
+             WHERE s.campaign_id = :campaign_id
+               AND s.started_at >= :start
+               AND s.started_at < :end
+             GROUP BY DATE(s.started_at)'
+        );
+
+        $completedStatement->execute([
+            'campaign_id' => $campaignId,
+            'start' => $start,
+            'end' => $end,
+        ]);
+
+        foreach ($completedStatement->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $date = $row['report_date'];
+
+            $daily[$date] ??= [
+                'shown' => 0,
+                'sessions' => 0,
+                'completed' => 0,
+            ];
+
+            $daily[$date]['completed'] = (int) $row['completed'];
+        }
+
+        ksort($daily);
+
+        return $daily;
+    }
 }
